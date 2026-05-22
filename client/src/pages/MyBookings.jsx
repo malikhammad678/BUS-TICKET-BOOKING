@@ -1,171 +1,137 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Bus, Calendar, Clock, MapPin, Download, Ticket,
-  CheckCircle, XCircle, AlertCircle, ChevronRight, Search, X
+  CheckCircle, XCircle, AlertCircle, ChevronRight, Search, X, Loader2
 } from "lucide-react";
-
-const mockBookings = [
-  {
-    bookingId: "BKAF3X91",
-    busName: "Daewoo Express",
-    busType: "AC",
-    fromCity: "Karachi",
-    toCity: "Lahore",
-    date: "2026-02-25",
-    departureTime: "10:00 AM",
-    duration: "16h",
-    price: 3500,
-    passengerName: "Muhammad Hammad",
-    gender: "Male",
-    phone: "03001234567",
-    cnic: "42101-1234567-1",
-    paymentMethod: "JazzCash",
-    bookingStatus: "Confirmed",
-    paymentStatus: "Paid",
-    bookedOn: "2026-02-20",
-  },
-  {
-    bookingId: "BKTZ82PQ",
-    busName: "Faisal Movers",
-    busType: "Sleeper",
-    fromCity: "Karachi",
-    toCity: "Islamabad",
-    date: "2026-02-26",
-    departureTime: "08:30 PM",
-    duration: "18h",
-    price: 4200,
-    passengerName: "Muhammad Hammad",
-    gender: "Male",
-    phone: "03001234567",
-    cnic: "42101-1234567-1",
-    paymentMethod: "EasyPaisa",
-    bookingStatus: "Pending",
-    paymentStatus: "Pending",
-    bookedOn: "2026-02-22",
-  },
-  {
-    bookingId: "BKRM19KW",
-    busName: "Skyways",
-    busType: "AC",
-    fromCity: "Lahore",
-    toCity: "Multan",
-    date: "2026-02-24",
-    departureTime: "02:00 PM",
-    duration: "5h",
-    price: 1500,
-    passengerName: "Muhammad Hammad",
-    gender: "Male",
-    phone: "03001234567",
-    cnic: "42101-1234567-1",
-    paymentMethod: "JazzCash",
-    bookingStatus: "Cancelled",
-    paymentStatus: "Paid",
-    bookedOn: "2026-02-18",
-  },
-];
-
+import { useAppContext } from "../context/Context";
 
 const statusConfig = {
-  Confirmed: {
+  confirmed: {
     icon: <CheckCircle size={14} />,
     bg: "bg-green-100", text: "text-green-700", dot: "bg-green-500",
     label: "Confirmed"
   },
-  Pending: {
+  pending: {
     icon: <AlertCircle size={14} />,
     bg: "bg-yellow-100", text: "text-yellow-700", dot: "bg-yellow-500",
     label: "Pending"
   },
-  Cancelled: {
+  cancelled: {
     icon: <XCircle size={14} />,
     bg: "bg-red-100", text: "text-red-600", dot: "bg-red-500",
     label: "Cancelled"
   },
 };
 
-const PrintTicket = ({ booking, ticketRef }) => (
-  <div
-    ref={ticketRef}
-    style={{
-      position: 'fixed', left: '-9999px', top: 0,
-      width: '600px', background: '#fff', fontFamily: 'sans-serif',
-      borderRadius: '16px', overflow: 'hidden',
-      boxShadow: '0 4px 32px rgba(0,0,0,0.12)'
-    }}
-  >
-    <div style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', padding: '28px 32px', color: '#fff' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <p style={{ fontSize: 11, opacity: 0.75, marginBottom: 4, letterSpacing: 2 }}>BUS TICKET</p>
-          <h1 style={{ fontSize: 26, fontWeight: 800, margin: 0 }}>{booking.fromCity} → {booking.toCity}</h1>
-          <p style={{ margin: '6px 0 0', opacity: 0.85, fontSize: 14 }}>{booking.busName} · {booking.busType}</p>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <p style={{ fontSize: 11, opacity: 0.75, marginBottom: 4 }}>BOOKING ID</p>
-          <p style={{ fontSize: 20, fontWeight: 800, letterSpacing: 2 }}>{booking.bookingId}</p>
-          <div style={{
-            background: '#22c55e', borderRadius: 8, padding: '6px 14px', marginTop: 8,
-            fontSize: 12, fontWeight: 800, letterSpacing: 1.5, color: '#fff',
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            boxShadow: '0 2px 8px rgba(34,197,94,0.5)'
-          }}>
-            <span style={{ fontSize: 14 }}>✔</span> {booking.bookingStatus.toUpperCase()}
+const PrintTicket = ({ booking, ticketRef }) => {
+  const fromCity = booking.fromCity || booking.bus?.fromCity || "";
+  const toCity = booking.toCity || booking.bus?.toCity || "";
+  const busName = booking.bus?.busName || "";
+  const busType = booking.bus?.busType || "";
+  const date = booking.bus?.date || "";
+  const departureTime = booking.bus?.departureTime || "";
+  const duration = booking.bus?.duration || "";
+  const price = booking.price || booking.bus?.price || 0;
+
+  return (
+    <div
+      ref={ticketRef}
+      style={{
+        position: 'fixed', left: '-9999px', top: 0,
+        width: '600px', background: '#fff', fontFamily: 'sans-serif',
+        borderRadius: '16px', overflow: 'hidden',
+        boxShadow: '0 4px 32px rgba(0,0,0,0.12)'
+      }}
+    >
+      <div style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', padding: '28px 32px', color: '#fff' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <p style={{ fontSize: 11, opacity: 0.75, marginBottom: 4, letterSpacing: 2 }}>BUS TICKET</p>
+            <h1 style={{ fontSize: 26, fontWeight: 800, margin: 0 }}>{fromCity} → {toCity}</h1>
+            <p style={{ margin: '6px 0 0', opacity: 0.85, fontSize: 14 }}>{busName} · {busType}</p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <p style={{ fontSize: 11, opacity: 0.75, marginBottom: 4 }}>BOOKING ID</p>
+            <p style={{ fontSize: 20, fontWeight: 800, letterSpacing: 2 }}>{booking.bookingId}</p>
+            <div style={{
+              background: '#22c55e', borderRadius: 8, padding: '6px 14px', marginTop: 8,
+              fontSize: 12, fontWeight: 800, letterSpacing: 1.5, color: '#fff',
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+            }}>
+              <span style={{ fontSize: 14 }}>✔</span> {booking.bookingStatus?.toUpperCase()}
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div style={{ display: 'flex', alignItems: 'center', background: '#f8f7ff' }}>
-      <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#fff', marginLeft: -10, flexShrink: 0 }} />
-      <div style={{ flex: 1, borderTop: '2px dashed #d8b4fe', margin: '0 8px' }} />
-      <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#fff', marginRight: -10, flexShrink: 0 }} />
-    </div>
+      <div style={{ display: 'flex', alignItems: 'center', background: '#f8f7ff' }}>
+        <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#fff', marginLeft: -10, flexShrink: 0 }} />
+        <div style={{ flex: 1, borderTop: '2px dashed #d8b4fe', margin: '0 8px' }} />
+        <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#fff', marginRight: -10, flexShrink: 0 }} />
+      </div>
 
-    <div style={{ padding: '24px 32px', background: '#f8f7ff' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: 20 }}>
-        {[
-          { label: 'PASSENGER', value: booking.passengerName },
-          { label: 'GENDER', value: booking.gender },
-          { label: 'PHONE', value: booking.phone },
-          { label: 'DEPARTURE DATE', value: booking.date },
-          { label: 'DEPARTURE TIME', value: booking.departureTime },
-          { label: 'DURATION', value: booking.duration },
-        ].map((item, i) => (
-          <div key={i}>
-            <p style={{ fontSize: 10, color: '#7c3aed', fontWeight: 700, letterSpacing: 1.5, marginBottom: 4 }}>{item.label}</p>
-            <p style={{ fontSize: 14, fontWeight: 600, color: '#1f2937', margin: 0 }}>{item.value}</p>
+      <div style={{ padding: '24px 32px', background: '#f8f7ff' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: 20 }}>
+          {[
+            { label: 'PASSENGER', value: booking.passengerName },
+            { label: 'GENDER', value: booking.gender },
+            { label: 'PHONE', value: booking.phone },
+            { label: 'DEPARTURE DATE', value: date },
+            { label: 'DEPARTURE TIME', value: departureTime },
+            { label: 'DURATION', value: duration },
+          ].map((item, i) => (
+            <div key={i}>
+              <p style={{ fontSize: 10, color: '#7c3aed', fontWeight: 700, letterSpacing: 1.5, marginBottom: 4 }}>{item.label}</p>
+              <p style={{ fontSize: 14, fontWeight: 600, color: '#1f2937', margin: 0 }}>{item.value}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{ borderTop: '1px solid #e9d5ff', margin: '16px 0' }} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <p style={{ fontSize: 10, color: '#7c3aed', fontWeight: 700, letterSpacing: 1.5, marginBottom: 4 }}>CNIC</p>
+            <p style={{ fontSize: 13, fontWeight: 600, color: '#1f2937', margin: 0 }}>{booking.cnic}</p>
           </div>
-        ))}
-      </div>
-      <div style={{ borderTop: '1px solid #e9d5ff', margin: '16px 0' }} />
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <p style={{ fontSize: 10, color: '#7c3aed', fontWeight: 700, letterSpacing: 1.5, marginBottom: 4 }}>CNIC</p>
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#1f2937', margin: 0 }}>{booking.cnic}</p>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <p style={{ fontSize: 10, color: '#7c3aed', fontWeight: 700, letterSpacing: 1.5, marginBottom: 4 }}>AMOUNT PAID</p>
-          <p style={{ fontSize: 22, fontWeight: 800, color: '#7c3aed', margin: 0 }}>Rs. {(booking.price + 50)?.toLocaleString()}</p>
+          <div style={{ textAlign: 'right' }}>
+            <p style={{ fontSize: 10, color: '#7c3aed', fontWeight: 700, letterSpacing: 1.5, marginBottom: 4 }}>AMOUNT PAID</p>
+            <p style={{ fontSize: 22, fontWeight: 800, color: '#7c3aed', margin: 0 }}>Rs. {(price + 50)?.toLocaleString()}</p>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div style={{ background: '#7c3aed', padding: '10px 32px', display: 'flex', justifyContent: 'space-between' }}>
-      <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, margin: 0 }}>Powered by BusBook Pakistan</p>
-      <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, margin: 0 }}>Please carry this ticket while boarding</p>
+      <div style={{ background: '#7c3aed', padding: '10px 32px', display: 'flex', justifyContent: 'space-between' }}>
+        <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, margin: 0 }}>Powered by BusBook Pakistan</p>
+        <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, margin: 0 }}>Please carry this ticket while boarding</p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const BookingCard = ({ booking }) => {
   const ticketRef = useRef(null);
   const [downloading, setDownloading] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const status = statusConfig[booking.bookingStatus] || statusConfig.Pending;
+
+  // ✅ Backend populated data se sahi fields nikalo
+  const fromCity = booking.fromCity || booking.bus?.fromCity || "—";
+  const toCity = booking.toCity || booking.bus?.toCity || "—";
+  const busName = booking.bus?.busName || "—";
+  const busType = booking.bus?.busType || "—";
+  const date = booking.bus?.date || "—";
+  const departureTime = booking.bus?.departureTime || "—";
+  const duration = booking.bus?.duration || "—";
+  const price = booking.price || booking.bus?.price || 0;
+  const bookedOn = booking.createdAt
+    ? new Date(booking.createdAt).toLocaleDateString()
+    : "—";
+
+  // ✅ lowercase status match
+  const status = statusConfig[booking.bookingStatus] || statusConfig.pending;
+  const isCancelled = booking.bookingStatus === "cancelled";
 
   const downloadTicket = useCallback(async () => {
-    if (booking.bookingStatus === 'Cancelled') return;
+    if (isCancelled) return;
     setDownloading(true);
     const run = async () => {
       const canvas = await window.html2canvas(ticketRef.current, {
@@ -184,62 +150,59 @@ const BookingCard = ({ booking }) => {
       script.onerror = () => setDownloading(false);
       document.head.appendChild(script);
     } else { run(); }
-  }, [booking]);
+  }, [booking, isCancelled]);
 
   return (
     <>
       <PrintTicket booking={booking} ticketRef={ticketRef} />
 
       <div className={`bg-white rounded-2xl shadow-sm border transition-all duration-200 overflow-hidden
-        ${booking.bookingStatus === 'Cancelled' ? 'border-red-100 opacity-80' : 'border-gray-100 hover:shadow-md'}`}>
+        ${isCancelled ? 'border-red-100 opacity-80' : 'border-gray-100 hover:shadow-md'}`}>
 
-    
-        <div className={`h-1 w-full ${booking.bookingStatus === 'Confirmed' ? 'bg-green-500' : booking.bookingStatus === 'Pending' ? 'bg-yellow-400' : 'bg-red-400'}`} />
+        <div className={`h-1 w-full ${
+          booking.bookingStatus === 'confirmed' ? 'bg-green-500' :
+          booking.bookingStatus === 'pending' ? 'bg-yellow-400' : 'bg-red-400'
+        }`} />
 
         <div className="p-5">
-     
           <div className="flex items-start justify-between gap-3 mb-3">
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-lg font-extrabold text-gray-800">
-                  {booking.fromCity}
+                  {fromCity}
                   <span className="text-primary mx-2">→</span>
-                  {booking.toCity}
+                  {toCity}
                 </h3>
-                <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">{booking.busType}</span>
+                <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">{busType}</span>
               </div>
-              <p className="text-sm text-gray-500 mt-0.5">{booking.busName}</p>
+              <p className="text-sm text-gray-500 mt-0.5">{busName}</p>
             </div>
 
-        
             <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold shrink-0 ${status.bg} ${status.text}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
               {status.label}
             </span>
           </div>
 
-    
           <div className="flex flex-wrap gap-3 text-xs text-gray-500 mb-4">
             <span className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-lg">
-              <Calendar size={13} className="text-primary" /> {booking.date}
+              <Calendar size={13} className="text-primary" /> {date}
             </span>
             <span className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-lg">
-              <Clock size={13} className="text-primary" /> {booking.departureTime}
+              <Clock size={13} className="text-primary" /> {departureTime}
             </span>
             <span className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-lg">
-              <MapPin size={13} className="text-primary" /> {booking.duration}
+              <MapPin size={13} className="text-primary" /> {duration}
             </span>
           </div>
 
-         
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <p className="text-2xl font-extrabold text-primary">Rs. {(booking.price + 50).toLocaleString()}</p>
+              <p className="text-2xl font-extrabold text-primary">Rs. {(price + 50).toLocaleString()}</p>
               <p className="text-xs text-gray-400 mt-0.5">ID: <span className="font-mono font-semibold text-gray-600">{booking.bookingId}</span></p>
             </div>
 
             <div className="flex items-center gap-2">
-            
               <button
                 onClick={() => setExpanded(!expanded)}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-gray-600 hover:border-primary hover:text-primary text-sm font-medium transition"
@@ -248,13 +211,12 @@ const BookingCard = ({ booking }) => {
                 <ChevronRight size={14} className={`transition-transform ${expanded ? 'rotate-90' : ''}`} />
               </button>
 
-           
               <button
                 onClick={downloadTicket}
-                disabled={downloading || booking.bookingStatus === 'Cancelled'}
-                title={booking.bookingStatus === 'Cancelled' ? 'Cancelled tickets cannot be downloaded' : 'Download Ticket'}
+                disabled={downloading || isCancelled}
+                title={isCancelled ? 'Cancelled tickets cannot be downloaded' : 'Download Ticket'}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all
-                  ${booking.bookingStatus === 'Cancelled'
+                  ${isCancelled
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     : 'bg-primary text-white hover:scale-105 hover:shadow-md'}`}
               >
@@ -266,7 +228,6 @@ const BookingCard = ({ booking }) => {
             </div>
           </div>
 
-      
           {expanded && (
             <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
               {[
@@ -274,8 +235,8 @@ const BookingCard = ({ booking }) => {
                 { label: 'Phone', value: booking.phone },
                 { label: 'CNIC', value: booking.cnic },
                 { label: 'Payment Method', value: booking.paymentMethod },
-                { label: 'Payment Status', value: booking.paymentStatus },
-                { label: 'Booked On', value: booking.bookedOn },
+                { label: 'Payment ID', value: booking.paymentNumber?.slice(0, 16) + "..." || "—" },
+                { label: 'Booked On', value: bookedOn },
               ].map((item, i) => (
                 <div key={i} className="bg-gray-50 rounded-xl px-3 py-2.5">
                   <p className="text-xs text-gray-400 mb-0.5">{item.label}</p>
@@ -290,39 +251,55 @@ const BookingCard = ({ booking }) => {
   );
 };
 
-// ─── Main MyBookings Page ──────────────────────────────────
 const MyBookings = () => {
   const navigate = useNavigate();
+  const { getUserBookings } = useAppContext();  // ✅ Context se real function
+
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
 
-  const filters = ['All', 'Confirmed', 'Pending', 'Cancelled'];
+  // ✅ Real API se bookings fetch karo
+  useEffect(() => {
+    const fetchBookings = async () => {
+      setLoading(true);
+      const data = await getUserBookings();
+      setBookings(data);
+      setLoading(false);
+    };
+    fetchBookings();
+  }, []);
 
-  const filtered = mockBookings.filter(b => {
+  const filters = ['All', 'confirmed', 'pending', 'cancelled'];
+  const filterLabels = { All: 'All', confirmed: 'Confirmed', pending: 'Pending', cancelled: 'Cancelled' };
+
+  const filtered = bookings.filter(b => {
     const matchFilter = filter === 'All' || b.bookingStatus === filter;
     const q = search.toLowerCase();
+    const fromCity = b.fromCity || b.bus?.fromCity || "";
+    const toCity = b.toCity || b.bus?.toCity || "";
+    const busName = b.bus?.busName || "";
     const matchSearch = !q ||
-      b.busName.toLowerCase().includes(q) ||
-      b.fromCity.toLowerCase().includes(q) ||
-      b.toCity.toLowerCase().includes(q) ||
-      b.bookingId.toLowerCase().includes(q);
+      busName.toLowerCase().includes(q) ||
+      fromCity.toLowerCase().includes(q) ||
+      toCity.toLowerCase().includes(q) ||
+      b.bookingId?.toLowerCase().includes(q);
     return matchFilter && matchSearch;
   });
 
   const counts = {
-    All: mockBookings.length,
-    Confirmed: mockBookings.filter(b => b.bookingStatus === 'Confirmed').length,
-    Pending: mockBookings.filter(b => b.bookingStatus === 'Pending').length,
-    Cancelled: mockBookings.filter(b => b.bookingStatus === 'Cancelled').length,
+    All: bookings.length,
+    confirmed: bookings.filter(b => b.bookingStatus === 'confirmed').length,
+    pending: bookings.filter(b => b.bookingStatus === 'pending').length,
+    cancelled: bookings.filter(b => b.bookingStatus === 'cancelled').length,
   };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
 
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="relative bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-white overflow-hidden pt-20">
-
-        {/* Background decoration circles */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-10 -right-10 w-72 h-72 bg-white/5 rounded-full" />
           <div className="absolute -bottom-16 -left-10 w-96 h-96 bg-white/5 rounded-full" />
@@ -330,8 +307,6 @@ const MyBookings = () => {
         </div>
 
         <div className="relative max-w-3xl mx-auto px-4 py-14 text-center">
-
-          {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm font-medium mb-5">
             <Ticket size={15} />
             Your Travel History
@@ -344,7 +319,6 @@ const MyBookings = () => {
             Track, manage and download all your bus tickets in one place.
           </p>
 
-          {/* Search Bar */}
           <div className="relative max-w-2xl mx-auto">
             <div className="flex items-center bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-white/30">
               <Search size={20} className="ml-4 text-gray-400 shrink-0" />
@@ -367,18 +341,17 @@ const MyBookings = () => {
               )}
             </div>
 
-            {/* Quick status chips below search */}
             <div className="flex flex-wrap justify-center gap-2 mt-4">
-              {['Confirmed', 'Pending', 'Cancelled'].map(s => (
+              {['confirmed', 'pending', 'cancelled'].map(s => (
                 <button
                   key={s}
                   onClick={() => setFilter(s)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium border transition
+                  className={`px-3 py-1 rounded-full text-xs font-medium border transition capitalize
                     ${filter === s
                       ? 'bg-white text-primary border-white'
                       : 'bg-white/10 text-white border-white/25 hover:bg-white/20'}`}
                 >
-                  {s}
+                  {filterLabels[s]}
                 </button>
               ))}
             </div>
@@ -386,7 +359,7 @@ const MyBookings = () => {
         </div>
       </div>
 
-      {/* ── Content ── */}
+      {/* Content */}
       <div className="max-w-3xl mx-auto px-4 py-8">
 
         {/* Filter Tabs */}
@@ -394,9 +367,9 @@ const MyBookings = () => {
           {filters.map(f => {
             const colors = {
               All: 'bg-primary text-white',
-              Confirmed: 'bg-green-500 text-white',
-              Pending: 'bg-yellow-400 text-white',
-              Cancelled: 'bg-red-500 text-white',
+              confirmed: 'bg-green-500 text-white',
+              pending: 'bg-yellow-400 text-white',
+              cancelled: 'bg-red-500 text-white',
             };
             return (
               <button
@@ -407,7 +380,7 @@ const MyBookings = () => {
                     ? colors[f]
                     : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'}`}
               >
-                {f}
+                {filterLabels[f]}
                 <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold
                   ${filter === f ? 'bg-white/25 text-white' : 'bg-gray-100 text-gray-500'}`}>
                   {counts[f]}
@@ -417,10 +390,15 @@ const MyBookings = () => {
           })}
         </div>
 
-        {/* Cards */}
-        {filtered.length > 0 ? (
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-3">
+            <Loader2 size={36} className="text-primary animate-spin" />
+            <p className="text-gray-500 text-sm">Loading your bookings...</p>
+          </div>
+        ) : filtered.length > 0 ? (
           <div className="flex flex-col gap-4">
-            {filtered.map(b => <BookingCard key={b.bookingId} booking={b} />)}
+            {filtered.map(b => <BookingCard key={b._id} booking={b} />)}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-24 text-center">

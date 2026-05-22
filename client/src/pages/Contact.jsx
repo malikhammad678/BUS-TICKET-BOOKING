@@ -17,43 +17,47 @@ const Contact = () => {
   };
 
   return (
-    <div className="px-2 sm:px-4 md:px-6 lg:px-20 bg-gray-50">
-      <div className="flex md:flex-row flex-col items-start pt-40 justify-between min-h-screen pb-20">
-        <div className="max-w-[50%] w-full ">
-          <h1 className="text-4xl  font-[600] text-primary">Contact Us</h1>
-          <p className="text-gray-500 my-3">
-            Have a question or just want to say hello? <br /> We'd love to hear
-            from you.
+    <div className="px-4 sm:px-6 md:px-10 lg:px-20 bg-gray-50">
+
+      {/* ── Section 1: Contact Info + Form ── */}
+      <div className="flex md:flex-row flex-col items-start pt-28 sm:pt-32 md:pt-40 justify-between pb-16 sm:pb-20 gap-10 md:gap-8 lg:gap-12">
+
+        {/* Left: Info */}
+        <div className="w-full md:w-[45%]">
+          <h1 className="text-3xl sm:text-4xl font-semibold text-primary">Contact Us</h1>
+          <p className="text-gray-500 my-3 text-sm sm:text-base leading-relaxed">
+            Have a question or just want to say hello? <br className="hidden sm:block" />
+            We'd love to hear from you.
           </p>
-          <a
-            href="mailto:info@busco.com"
-            className="mt-6 flex items-center gap-2"
-          >
-            <Mail className="size-5 text-primary" />
+
+          <a href="mailto:info@busco.com" className="mt-6 flex items-center gap-2 text-sm sm:text-base text-gray-700 hover:text-primary transition-colors">
+            <Mail className="size-5 text-primary shrink-0" />
             info@busco.com
           </a>
-          <a href="tel:+923251453078" className="mt-5 flex items-center gap-2 ">
-            <Phone className="size-5 text-primary" />
+          <a href="tel:+923251453078" className="mt-4 flex items-center gap-2 text-sm sm:text-base text-gray-700 hover:text-primary transition-colors">
+            <Phone className="size-5 text-primary shrink-0" />
             +923251453078
           </a>
-          <a href="tel:+923251453078" className="mt-5 flex items-center gap-2">
-            <Pin className="size-5 text-primary" />
+          <div className="mt-4 flex items-center gap-2 text-sm sm:text-base text-gray-700">
+            <Pin className="size-5 text-primary shrink-0" />
             Faisalabad, Punjab, Pakistan
-          </a>
+          </div>
         </div>
-        <div className="max-w-[50%] w-full p-8 shadow-2xl rounded-lg bg-white">
-          <h2 className="text-3xl font-[500]">Get In Touch</h2>
-          <p className="text-sm text-gray-500 mt-1 mb-3">
-            You can reach us anytime
-          </p>
-          <form onSubmit={handleSubmit} className="mt-10">
+
+        {/* Right: Form */}
+        <div className="w-full md:w-[55%] p-5 sm:p-8 shadow-2xl rounded-lg bg-white">
+          <h2 className="text-2xl sm:text-3xl font-medium">Get In Touch</h2>
+          <p className="text-sm text-gray-500 mt-1 mb-3">You can reach us anytime</p>
+
+          <form onSubmit={handleSubmit} className="mt-6 sm:mt-10">
+
             <div className="flex items-center justify-between gap-3">
               <input
                 onChange={(e) => setFirstName(e.target.value)}
                 value={firstName}
                 type="text"
                 placeholder="First Name"
-                className="w-full border border-gray-300 px-3 py-3 text-sm rounded-lg outline-0"
+                className="w-full border border-gray-300 px-3 py-2.5 sm:py-3 text-sm rounded-lg outline-none focus:border-primary transition-colors"
                 required
               />
               <input
@@ -61,69 +65,74 @@ const Contact = () => {
                 value={lastName}
                 type="text"
                 placeholder="Last Name"
-                className="w-full border border-gray-300 px-3 py-3 text-sm rounded-lg outline-0"
+                className="w-full border border-gray-300 px-3 py-2.5 sm:py-3 text-sm rounded-lg outline-none focus:border-primary transition-colors"
                 required
               />
             </div>
+
             <input
               onChange={(e) => setEmail(e.target.value)}
               value={email}
               type="email"
               placeholder="Email"
-              className="w-full mt-4 border border-gray-300 px-3 py-3 text-sm rounded-lg outline-0"
+              className="w-full mt-4 border border-gray-300 px-3 py-2.5 sm:py-3 text-sm rounded-lg outline-none focus:border-primary transition-colors"
               required
             />
             <input
               onChange={(e) => setPhone(e.target.value)}
               value={phone}
-              type="phone"
+              type="tel"
               placeholder="Phone"
-              className="w-full mt-4 border border-gray-300 px-3 py-3 text-sm rounded-lg outline-0"
+              className="w-full mt-4 border border-gray-300 px-3 py-2.5 sm:py-3 text-sm rounded-lg outline-none focus:border-primary transition-colors"
               required
             />
             <textarea
               onChange={(e) => setMessage(e.target.value)}
               value={message}
-              name=""
               placeholder="How can we help?"
-              className="w-full h-50 mt-4 border border-gray-300 px-3 py-3 text-sm rounded-lg outline-0"
-              id=""
+              className="w-full h-36 sm:h-44 mt-4 border border-gray-300 px-3 py-3 text-sm rounded-lg outline-none focus:border-primary transition-colors resize-none"
             ></textarea>
 
             <button
               type="submit"
-              className="mt-3 flex items-center gap-2 justify-center w-full py-3 rounded-lg cursor-pointer bg-primary text-white"
+              className="mt-3 flex items-center gap-2 justify-center w-full py-2.5 sm:py-3 rounded-lg cursor-pointer bg-primary text-white text-sm sm:text-base hover:opacity-90 transition-opacity"
             >
               {loading ? (
                 <Loader className="animate-spin size-5" />
               ) : (
                 <>
-                  Send <Send />
+                  Send <Send className="size-4" />
                 </>
               )}
             </button>
+
           </form>
         </div>
       </div>
-      <div className="flex md:flex-row flex-col items-center pt-20 justify-between min-h-screen pb-20 gap-10 ">
-        <div className="max-w-[50%] w-full">
+
+      <div className="flex md:flex-row flex-col items-center justify-between pb-16 sm:pb-20 gap-8 md:gap-10">
+
+        <div className="w-full md:w-[50%]">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d217897.62046143698!2d72.92448580884746!3d31.42375904202356!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x392242a895a55ca9%3A0xdec58f88932671c6!2sFaisalabad%2C%20Pakistan!5e0!3m2!1sen!2s!4v1772634260245!5m2!1sen!2s"
             width="100%"
-            height="500"
-            className="rounded-lg"
+            height="350"
+            className="rounded-lg w-full sm:h-[420px] md:h-[500px]"
+            style={{ height: undefined }}
+            allowFullScreen
+            loading="lazy"
           ></iframe>
         </div>
-        <div className="max-w-[50%] w-full">
-          <h3 className="text-black font-[500] text-2xl text-primary">
-            Our Location
-          </h3>
-          <h1 className="text-black font-[600] text-3xl mt-1">
+
+        <div className="w-full md:w-[45%]">
+          <h3 className="font-medium text-xl sm:text-2xl text-primary">Our Location</h3>
+          <h1 className="text-black font-semibold text-2xl sm:text-3xl mt-1 leading-snug">
             Connecting Near and Far
           </h1>
-          <h4 className="text-lg text-black mt-5">Headquaters</h4>
-          <p className="mt-1">Faisalabad, Pakistan</p>
+          <h4 className="text-base sm:text-lg text-black mt-5 font-medium">Headquarters</h4>
+          <p className="mt-1 text-gray-600 text-sm sm:text-base">Faisalabad, Pakistan</p>
         </div>
+
       </div>
     </div>
   );

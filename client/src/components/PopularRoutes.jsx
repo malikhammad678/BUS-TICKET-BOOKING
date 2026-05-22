@@ -17,7 +17,7 @@ const PopularRoutes = () => {
     },[buses])
 
   return (
-    <div className='px-2 sm:px-4 md:px-6 lg:px-20 pt-10 pb-20 bg-gray-50'>
+    <div className='px-4 sm:px-4 md:px-6 lg:px-20 pt-10 pb-20 bg-gray-50'>
         <Title title1={"Popular"} title2={"Routes"} subTitle={"Explore the most frequently booked bus routes."} />
       
       <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">

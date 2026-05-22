@@ -34,7 +34,6 @@ export const createBooking = async (req, res) => {
       return res.status(404).json({ success: false, message: "Bus not found" });
     }
 
-  
     let bookingId;
     let isUnique = false;
 
@@ -44,7 +43,6 @@ export const createBooking = async (req, res) => {
       if (!existing) isUnique = true;
     }
 
-  
     const booking = await Booking.create({
       bookingId,
       user: userId,
@@ -60,6 +58,8 @@ export const createBooking = async (req, res) => {
       cnic,
       paymentMethod,
       paymentNumber,
+
+      paymentStatus: "Paid",
     });
 
     await User.findByIdAndUpdate(userId, {
@@ -133,7 +133,6 @@ export const updateBookingStatus = async (req, res) => {
   }
 };
 
-
 export const deleteBooking = async (req, res) => {
   try {
     const booking = await Booking.findByIdAndDelete(req.params.id);
@@ -153,4 +152,3 @@ export const deleteBooking = async (req, res) => {
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-

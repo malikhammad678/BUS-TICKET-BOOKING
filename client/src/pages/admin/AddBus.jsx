@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bus, MapPin, Clock, Calendar, DollarSign, Tag, Image, Star, ArrowRight, Upload } from "lucide-react";
+import { Bus, MapPin, Clock, Calendar, DollarSign, Tag, Star, ArrowRight, Upload, CurrencyIcon } from "lucide-react";
 import { useAppContext } from "../../context/Context";
 
 const busTypes = ["AC", "Non-AC", "Sleeper", "Mini"];
@@ -64,52 +64,47 @@ const AddBus = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    addNewBus(form)
+    addNewBus(form);
   };
 
   return (
-    <div className="max-w-3xl">
+    <div className="w-full max-w-3xl">
 
-
-      <div className="mb-6">
-        <div className="flex items-start gap-2 mb-1">
-    
-          <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Add New Bus</h1>
-        </div>
-        <p className="text-sm text-gray-400">Fill in the details to add a new bus to the system</p>
+      <div className="mb-5 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800 tracking-tight">Add New Bus</h1>
+        <p className="text-xs sm:text-sm text-gray-400 mt-0.5">Fill in the details to add a new bus to the system</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
 
-  
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-0 p-5">
-          <h2 className="text-sm font-bold text-primary mb-4 uppercase tracking-wider">Bus Image</h2>
+        {/* Bus Image */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5">
+          <h2 className="text-xs sm:text-sm font-bold text-primary mb-3 sm:mb-4 uppercase tracking-wider">Bus Image</h2>
           <label className="cursor-pointer block">
             <input type="file" accept="image/*" onChange={handleImage} className="hidden" />
             {preview ? (
-              <div className="relative group rounded-xl overflow-hidden h-44 border border-gray-200">
+              <div className="relative group rounded-xl overflow-hidden h-36 sm:h-44 border border-gray-200">
                 <img src={preview} alt="preview" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center">
                   <p className="text-white text-sm font-semibold">Click to change</p>
                 </div>
               </div>
             ) : (
-              <div className="h-44 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 hover:bg-primary/5 hover:border-primary/40 transition-all duration-200 flex flex-col items-center justify-center gap-2">
+              <div className="h-36 sm:h-44 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 hover:bg-primary/5 hover:border-primary/40 transition-all duration-200 flex flex-col items-center justify-center gap-2">
                 <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
                   <Upload size={18} className="text-gray-400" />
                 </div>
-                <p className="text-sm text-gray-400">Click to upload bus image</p>
-                <p className="text-xs text-gray-300">PNG, JPG up to 5MB</p>
+                <p className="text-xs sm:text-sm text-gray-400">Click to upload bus image</p>
+                <p className="text-[10px] sm:text-xs text-gray-300">PNG, JPG up to 5MB</p>
               </div>
             )}
           </label>
         </div>
 
         {/* Basic Info */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-0 p-5">
-          <h2 className="text-sm font-bold text-primary mb-4 uppercase tracking-wider">Basic Info</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
+        <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5">
+          <h2 className="text-xs sm:text-sm font-bold text-primary mb-3 sm:mb-4 uppercase tracking-wider">Basic Info</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <InputWrapper label="Bus Name" icon={Bus}>
               <input
                 name="busName"
@@ -120,53 +115,45 @@ const AddBus = () => {
                 className={inputClass}
               />
             </InputWrapper>
-
             <InputWrapper label="Bus Type" icon={Tag}>
               <select name="busType" value={form.busType} onChange={handleChange} required className={selectClass}>
                 <option value="">Select type</option>
                 {busTypes.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
             </InputWrapper>
-
           </div>
         </div>
 
         {/* Route */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-0 p-5">
-          <h2 className="text-sm font-bold text-primary mb-4 uppercase tracking-wider">Route Details</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
+        <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5">
+          <h2 className="text-xs sm:text-sm font-bold text-primary mb-3 sm:mb-4 uppercase tracking-wider">Route Details</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <InputWrapper label="From City" icon={MapPin}>
               <select name="fromCity" value={form.fromCity} onChange={handleChange} required className={selectClass}>
                 <option value="">Select city</option>
                 {cities.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </InputWrapper>
-
             <InputWrapper label="To City" icon={MapPin}>
               <select name="toCity" value={form.toCity} onChange={handleChange} required className={selectClass}>
                 <option value="">Select city</option>
                 {cities.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </InputWrapper>
-
           </div>
-
-          {/* Arrow between cities */}
           {form.fromCity && form.toCity && (
-            <div className="mt-3 flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5">
-              <span className="text-sm font-semibold text-primary">{form.fromCity}</span>
-              <ArrowRight size={16} className="text-primary" />
-              <span className="text-sm font-semibold text-primary">{form.toCity}</span>
+            <div className="mt-3 flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-xl px-3 sm:px-4 py-2.5">
+              <span className="text-xs sm:text-sm font-semibold text-primary">{form.fromCity}</span>
+              <ArrowRight size={14} className="text-primary shrink-0" />
+              <span className="text-xs sm:text-sm font-semibold text-primary">{form.toCity}</span>
             </div>
           )}
         </div>
 
         {/* Schedule */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-0 p-5">
-          <h2 className="text-sm font-bold text-primary mb-4 uppercase tracking-wider">Schedule</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-
+        <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5">
+          <h2 className="text-xs sm:text-sm font-bold text-primary mb-3 sm:mb-4 uppercase tracking-wider">Schedule</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <InputWrapper label="Date" icon={Calendar}>
               <input
                 type="date"
@@ -177,7 +164,6 @@ const AddBus = () => {
                 className={inputClass}
               />
             </InputWrapper>
-
             <InputWrapper label="Departure Time" icon={Clock}>
               <input
                 name="departureTime"
@@ -188,7 +174,6 @@ const AddBus = () => {
                 className={inputClass}
               />
             </InputWrapper>
-
             <InputWrapper label="Duration" icon={Clock}>
               <input
                 name="duration"
@@ -199,16 +184,13 @@ const AddBus = () => {
                 className={inputClass}
               />
             </InputWrapper>
-
           </div>
         </div>
 
-        {/* Pricing */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-0 p-5">
-          <h2 className="text-sm font-bold text-primary mb-4 uppercase tracking-wider">Pricing & Tags</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
-
-            <InputWrapper label="Price (PKR)" icon={DollarSign}>
+        <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5">
+          <h2 className="text-xs sm:text-sm font-bold text-primary mb-3 sm:mb-4 uppercase tracking-wider">Pricing & Tags</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 items-end">
+            <InputWrapper label="Price (PKR)" icon={CurrencyIcon}>
               <input
                 type="number"
                 name="price"
@@ -219,8 +201,6 @@ const AddBus = () => {
                 className={inputClass}
               />
             </InputWrapper>
-
-            {/* Best Seller Toggle */}
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">
                 Best Seller
@@ -228,29 +208,25 @@ const AddBus = () => {
               <button
                 type="button"
                 onClick={() => setForm(p => ({ ...p, bestSeller: !p.bestSeller }))}
-                className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all duration-200 cursor-pointer
+                className={`flex items-center gap-2 sm:gap-3 w-full px-3 sm:px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer
                   ${form.bestSeller
                     ? "bg-yellow-50 border-yellow-300 text-yellow-700"
                     : "bg-gray-50 border-gray-200 text-gray-400"
                   }`}
               >
-                <Star size={16} className={form.bestSeller ? "fill-yellow-400 text-yellow-400" : ""} />
+                <Star size={15} className={form.bestSeller ? "fill-yellow-400 text-yellow-400" : ""} />
                 {form.bestSeller ? "Marked as Best Seller" : "Mark as Best Seller"}
               </button>
             </div>
-
           </div>
         </div>
 
-        {/* Submit */}
         <button
           type="submit"
-          className="w-full bg-primary text-white py-3.5 rounded-2xl font-bold text-sm tracking-wide hover:scale-[1.01] hover:shadow-lg hover:shadow-primary/20 transition-all duration-200 cursor-pointer flex items-center justify-center gap-2"
+          className="w-full bg-primary text-white py-3 sm:py-3.5 rounded-2xl font-bold text-sm tracking-wide hover:scale-[1.01] hover:shadow-lg hover:shadow-primary/20 transition-all duration-200 cursor-pointer flex items-center justify-center gap-2"
         >
-          <Bus size={17} />
-          {
-            loading ? 'Adding...' : 'Add Bus'
-          }
+          <Bus size={16} />
+          {loading ? 'Adding...' : 'Add Bus'}
         </button>
 
       </form>

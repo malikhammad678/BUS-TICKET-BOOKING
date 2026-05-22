@@ -5,8 +5,7 @@ import hero_img from '../assets/images/bus-img.png'
 
 const Hero = () => {
 
-  const { loginUser } = useAppContext()
-  const navigate = useNavigate()
+  const { loginUser, navigate } = useAppContext()
 
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
@@ -15,86 +14,92 @@ const Hero = () => {
 
   const handleSearch = () => {
     const params = new URLSearchParams()
-    if (from)    params.set('from', from)
-    if (to)      params.set('to', to)
-    if (date)    params.set('date', date)
+    if (from)     params.set('from', from)
+    if (to)       params.set('to', to)
+    if (date)     params.set('date', date)
     if (maxPrice) params.set('maxPrice', maxPrice)
 
     navigate(`/buses?${params.toString()}`)
   }
 
   return (
-    <div className='hero-section flex items-center lg:justify-between justify-center px-2 sm:px-4 md:px-6 lg:px-20 relative'>
+    <div className='hero-section flex flex-col lg:flex-row lg:items-center lg:justify-between justify-start px-4 sm:px-6 md:px-10 lg:px-20 relative'>
 
-      <div className='w-[55%]'>
-        <h1 className='text-[55px] max-lg:text-center font-semibold leading-15'>
+      <div className='w-full lg:w-[52%] flex flex-col items-center lg:items-start text-center lg:text-left pt-30 sm:pt-8 lg:pt-0'>
+
+        <h1 className='text-[32px] sm:text-[44px] md:text-[50px] lg:text-[55px] font-semibold leading-tight'>
           Travel <span className='text-primary'>Smarter</span> Across Pakistan
         </h1>
-        <p className='text-lg text-gray-700 mt-2 max-lg:text-center'>
+
+        <p className='text-base sm:text-lg text-gray-700 mt-3 max-w-[520px]'>
           Book bus tickets instantly. Compare prices, choose your seat, and travel stress-free.
         </p>
 
-        <div className='mt-4 flex items-center max-lg:justify-center gap-5'>
-          <button className='py-3 text-lg cursor-pointer rounded-lg px-8 bg-primary text-white hover:scale-105 transition-all duration-300'>
-            {loginUser ? "Book Ticket" : "Get Started"}
+        <div className='mt-5 flex items-center gap-4 flex-wrap justify-center lg:justify-start'>
+          <button onClick={() => navigate("/buses")} className='py-2.5 sm:py-3 text-base sm:text-lg cursor-pointer rounded-lg px-6 sm:px-8 bg-primary text-white hover:scale-105 transition-all duration-300'>
+            Book Ticket
           </button>
-          <button className='py-3 text-lg rounded-lg px-8 bg-transparent border-2 hover:bg-primary hover:text-white transition-all duration-300 cursor-pointer border-primary text-primary'>
+          <button onClick={() => navigate("/contact")} className='py-2.5 sm:py-3 text-base sm:text-lg rounded-lg px-6 sm:px-8 bg-transparent border-2 hover:bg-primary hover:text-white transition-all duration-300 cursor-pointer border-primary text-primary'>
             Contact Us
           </button>
         </div>
       </div>
 
       <div className='lg:block hidden'>
-        <img src={hero_img} className='absolute w-150 top-[50%] right-0 translate-y-[-50%]' alt="" />
+        <img
+          src={hero_img}
+          className='absolute w-[580px] xl:w-[620px] top-[50%] right-0 translate-y-[-50%] pointer-events-none select-none'
+          alt="Bus illustration"
+        />
       </div>
 
-      {/* ── Search Card ── */}
-      <div className='absolute -bottom-16 left-1/2 translate-x-[-50%] w-[90%] lg:w-[80%] bg-white rounded-2xl shadow-2xl p-6'>
 
-        <div className='grid grid-cols-1 md:grid-cols-5 gap-4 items-end'>
+      <div className='
+        mt-8
+        lg:absolute lg:mt-0 lg:mb-0 lg:-bottom-16 lg:left-1/2 lg:-translate-x-1/2
+        w-full lg:w-[80%]
+        bg-white rounded-2xl shadow-2xl p-4 sm:p-6
+      '>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 items-end'>
 
-          {/* From */}
           <div className='flex flex-col gap-1'>
-            <label className='text-sm text-gray-500'>From</label>
+            <label className='text-xs sm:text-sm text-gray-500 font-medium'>From</label>
             <input
               type="text"
               placeholder="Karachi"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className='w-full text-black border border-gray-400 rounded-lg px-3 py-2 outline-none focus:border-primary'
+              className='w-full text-black border border-gray-300 rounded-lg px-3 py-2 sm:py-2.5 outline-none focus:border-primary text-sm transition-colors'
             />
           </div>
 
-          {/* To */}
           <div className='flex flex-col gap-1'>
-            <label className='text-sm text-gray-500'>To</label>
+            <label className='text-xs sm:text-sm text-gray-500 font-medium'>To</label>
             <input
               type="text"
               placeholder="Lahore"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className='w-full border text-black border-gray-400 rounded-lg px-3 py-2 outline-none focus:border-primary'
+              className='w-full border text-black border-gray-300 rounded-lg px-3 py-2 sm:py-2.5 outline-none focus:border-primary text-sm transition-colors'
             />
           </div>
 
-          {/* Date */}
           <div className='flex flex-col gap-1'>
-            <label className='text-sm text-gray-500'>Departure</label>
+            <label className='text-xs sm:text-sm text-gray-500 font-medium'>Departure</label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className='w-full border border-gray-400 rounded-lg px-3 py-2 outline-none focus:border-primary'
+              className='w-full border border-gray-300 rounded-lg px-3 py-2 sm:py-2.5 outline-none focus:border-primary text-sm transition-colors text-black'
             />
           </div>
 
-          {/* Max Price — replaces Adults */}
           <div className='flex flex-col gap-1'>
-            <label className='text-sm text-gray-500'>Max Price (Rs.)</label>
+            <label className='text-xs sm:text-sm text-gray-500 font-medium'>Max Price (Rs.)</label>
             <select
               value={maxPrice}
               onChange={(e) => setMaxPrice(e.target.value)}
-              className='w-full border border-gray-400 rounded-lg px-3 py-2 outline-none focus:border-primary text-black'
+              className='w-full border border-gray-300 rounded-lg px-3 py-2 sm:py-2.5 outline-none focus:border-primary text-sm text-black transition-colors'
             >
               <option value=''>Any Price</option>
               <option value='1000'>Up to Rs. 1,000</option>
@@ -104,16 +109,16 @@ const Hero = () => {
             </select>
           </div>
 
-          {/* Search Button */}
           <button
             onClick={handleSearch}
-            className='bg-primary text-white rounded-lg py-3 cursor-pointer font-semibold hover:scale-105 transition-all duration-300'
+            className='sm:col-span-2 md:col-span-1 lg:col-span-1 bg-primary text-white rounded-lg py-2.5 sm:py-3 cursor-pointer font-semibold text-sm sm:text-base hover:scale-105 transition-all duration-300 w-full'
           >
             Search Bus
           </button>
 
         </div>
       </div>
+
     </div>
   )
 }

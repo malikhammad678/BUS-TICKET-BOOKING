@@ -2,13 +2,12 @@ import { Calendar, Clock, Star } from "lucide-react";
 import { useAppContext } from '../context/Context';
 import { useNavigate } from 'react-router-dom';
 
-const BusCard = ({ bus }) => {
+const BusCard = ({ bus }) => {  
   const { loginUser } = useAppContext();
   const navigate = useNavigate();
 
-  const handleBook = () => {
+  const handleBook = () => {  
     if (!loginUser) {
-      // Login page par bhejo, aur redirect info saath rakhein
       navigate('/login', { state: { redirectTo: `/booking/${bus._id}`, bus } });
     } else {
       navigate(`/booking/${bus._id}`, { state: { bus } });

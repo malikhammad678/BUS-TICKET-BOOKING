@@ -16,6 +16,7 @@ import {
 import axios from "axios";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const steps = ["Passenger Info", "Payment", "Confirmation"];
 
@@ -104,7 +105,6 @@ const PassengerForm = ({ data, setData, onNext }) => {
   );
 };
 
-// Stripe card element styles
 const cardStyle = {
   style: {
     base: {
@@ -122,7 +122,9 @@ const PaymentForm = ({ bus, passenger, onBack, onPay }) => {
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const token = localStorage.getItem("token");
+
+  // ✅ FIX: userToken use karo, "token" nahi
+  const token = localStorage.getItem("userToken");
 
   const totalAmount = bus.price + 50;
 
@@ -132,14 +134,13 @@ const PaymentForm = ({ bus, passenger, onBack, onPay }) => {
     setError("");
 
     try {
-      // 1. Backend se client secret lo
+      // ✅ FIX: BACKEND_URL use karo correct endpoint ke sath
       const { data } = await axios.post(
-        "/api/payment/create-intent",
+        `${BACKEND_URL}/payment/create-intent`,
         { amount: totalAmount },
         { headers: { token } }
       );
 
-      // 2. Payment confirm karo
       const result = await stripe.confirmCardPayment(data.clientSecret, {
         payment_method: {
           card: elements.getElement(CardNumberElement),
@@ -157,9 +158,9 @@ const PaymentForm = ({ bus, passenger, onBack, onPay }) => {
       }
 
       if (result.paymentIntent.status === "succeeded") {
-        // 3. Booking create karo
+        // ✅ FIX: BACKEND_URL use karo booking create ke liye
         await axios.post(
-          "/api/booking/create",
+          `${BACKEND_URL}/booking/create`,
           {
             busId: bus._id,
             passengerName: passenger.name,
@@ -187,7 +188,6 @@ const PaymentForm = ({ bus, passenger, onBack, onPay }) => {
       <h2 className="text-xl font-bold text-gray-800 mb-1">Payment</h2>
       <p className="text-gray-500 text-sm mb-6">Enter your card details to complete booking</p>
 
-      {/* Stripe Card UI */}
       <div className="bg-gradient-to-br from-primary to-primary/80 rounded-2xl p-5 mb-6 text-white shadow-lg">
         <div className="flex justify-between items-center mb-6">
           <p className="text-xs font-semibold tracking-widest opacity-80">SECURE PAYMENT</p>
@@ -201,7 +201,6 @@ const PaymentForm = ({ bus, passenger, onBack, onPay }) => {
       </div>
 
       <div className="space-y-4 mb-5">
-        {/* Card Number */}
         <div>
           <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
             Card Number
@@ -209,10 +208,9 @@ const PaymentForm = ({ bus, passenger, onBack, onPay }) => {
           <div className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-white focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary transition">
             <CardNumberElement options={cardStyle} />
           </div>
-        </div>
+        </div> 
 
         <div className="grid grid-cols-2 gap-3">
-          {/* Expiry */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
               Expiry Date
@@ -222,7 +220,6 @@ const PaymentForm = ({ bus, passenger, onBack, onPay }) => {
             </div>
           </div>
 
-          {/* CVC */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
               CVC
@@ -233,12 +230,10 @@ const PaymentForm = ({ bus, passenger, onBack, onPay }) => {
           </div>
         </div>
 
-        {/* Test card hint */}
         <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-xs text-blue-600 font-medium">
           🧪 Test card: <span className="font-bold">4242 4242 4242 4242</span> · Any future date · Any CVC
         </div>
 
-        {/* Error */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-xs text-red-600 font-medium">
             ❌ {error}
@@ -246,7 +241,6 @@ const PaymentForm = ({ bus, passenger, onBack, onPay }) => {
         )}
       </div>
 
-      {/* Price Summary */}
       <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2 text-sm">
         <div className="flex justify-between text-gray-600"><span>Ticket Price</span><span>Rs. {bus.price?.toLocaleString()}</span></div>
         <div className="flex justify-between text-gray-600"><span>Service Fee</span><span>Rs. 50</span></div>
@@ -344,9 +338,7 @@ const Confirmation = ({ bus, passenger, paymentId }) => {
   const downloadTicket = useCallback(async () => {
     setDownloading(true);
     try {
-      const script = document.createElement("script");
-      script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
-      script.onload = async () => {
+      const run = async () => {
         const canvas = await window.html2canvas(ticketRef.current, {
           scale: 2, useCORS: true, backgroundColor: "#ffffff",
         });
@@ -356,8 +348,14 @@ const Confirmation = ({ bus, passenger, paymentId }) => {
         link.click();
         setDownloading(false);
       };
-      if (!window.html2canvas) document.head.appendChild(script);
-      else script.onload();
+      if (!window.html2canvas) {
+        const script = document.createElement("script");
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+        script.onload = run;
+        document.head.appendChild(script);
+      } else {
+        run();
+      }
     } catch (err) {
       console.error(err);
       setDownloading(false);
@@ -412,7 +410,6 @@ const Confirmation = ({ bus, passenger, paymentId }) => {
   );
 };
 
-// Main
 const BookingPage = () => {
   const location = useLocation();
   const navigate = useNavigate();

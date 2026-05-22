@@ -28,7 +28,7 @@ const Data = [
 
 const HeroSection2 = () => {
   return (
-    <div className='px-2 sm:px-4 md:px-6 lg:px-20 pt-45 pb-20'>
+    <div className='px-4 sm:px-4 md:px-6 lg:px-20 md:pt-45 pt-20 pb-20'>
         <Title title1='Why' title2='Choose Us' subTitle='Travel across Pakistan with comfort, safety, and confidence.' />
 
          <div className='mt-10 grid grid-cols-1 md:grid-cols-2 gap-3'>

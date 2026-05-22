@@ -11,7 +11,7 @@ import Title from './Title';
 
 const Testimonials = () => {
    return (
-        <div className="text-center px-2 sm:px-4 md:px-6 lg:px-20 mb-10 mt-30">
+        <div className="text-center px-4 sm:px-4 md:px-6 lg:px-20 mb-10 mt-30">
             <Title title1={"What Our"} title2={"Clients Say"} subTitle={"Our passengers share their smooth and reliable experience with our easy and secure bus ticket booking service."} />
             <div className='mt-10'>
             <Swiper
