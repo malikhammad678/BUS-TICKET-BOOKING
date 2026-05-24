@@ -20,7 +20,6 @@ import ManageUsers from "./pages/admin/ManageUsers"
 import { Toaster } from 'react-hot-toast'
 import ManageMessages from "./pages/admin/ManageMessages"
 
-// 🆕 Self Booking Imports
 import SelfBookingForm from "./components/SelfBookingForm"
 import SelfBookingSeatSelection from "./pages/SelfBookingSeatSelection"
 import SelfBookingPayment from "./pages/SelfBookingPayment"
@@ -69,7 +68,6 @@ const App = () => {
                         location.pathname.includes("/self-booking") ||
                         location.pathname === "/booking-success"
 
-  // Don't show floating button on admin pages, auth pages, and booking flow
   const showFloatingButton = userToken && !isAdminPath && !isAuthPage && !isBookingFlow
 
   return (
