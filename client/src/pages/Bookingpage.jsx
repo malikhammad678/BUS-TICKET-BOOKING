@@ -14,27 +14,28 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import axios from "axios";
+import SeatSelector from "../components/SeatSelector";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-const steps = ["Passenger Info", "Payment", "Confirmation"];
+const steps = ["Select Seats", "Passenger Info", "Payment", "Confirmation"];
 
 const StepBar = ({ current }) => (
-  <div className="flex items-center justify-center gap-0 mb-10">
+  <div className="flex items-center justify-center gap-0 mb-10 w-full overflow-hidden">
     {steps.map((label, i) => (
       <div key={i} className="flex items-center">
         <div className="flex flex-col items-center">
-          <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
             ${i < current ? "bg-green-500 text-white" : i === current ? "bg-primary text-white scale-110 shadow-lg" : "bg-gray-200 text-gray-400"}`}>
-            {i < current ? <CheckCircle size={18} /> : i + 1}
+            {i < current ? <CheckCircle size={16} /> : i + 1}
           </div>
-          <span className={`text-xs mt-1 font-medium whitespace-nowrap ${i === current ? "text-primary" : "text-gray-400"}`}>
+          <span className={`text-[10px] mt-1 font-medium whitespace-nowrap ${i === current ? "text-primary" : "text-gray-400"}`}>
             {label}
           </span>
         </div>
         {i < steps.length - 1 && (
-          <div className={`w-16 sm:w-24 h-0.5 mb-4 mx-1 transition-all duration-500 ${i < current ? "bg-green-500" : "bg-gray-200"}`} />
+          <div className={`w-8 sm:w-14 h-0.5 mb-4 mx-0.5 transition-all duration-500 ${i < current ? "bg-green-500" : "bg-gray-200"}`} />
         )}
       </div>
     ))}
@@ -117,16 +118,14 @@ const cardStyle = {
   },
 };
 
-const PaymentForm = ({ bus, passenger, onBack, onPay }) => {
+const PaymentForm = ({ bus, passenger, selectedSeats, lockId, onBack, onPay }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // ✅ FIX: userToken use karo, "token" nahi
   const token = localStorage.getItem("userToken");
 
-  const totalAmount = bus.price + 50;
+  const totalAmount = bus.price * selectedSeats.length + 50;
 
   const handlePay = async () => {
     if (!stripe || !elements) return;
@@ -134,7 +133,6 @@ const PaymentForm = ({ bus, passenger, onBack, onPay }) => {
     setError("");
 
     try {
-      // ✅ FIX: BACKEND_URL use karo correct endpoint ke sath
       const { data } = await axios.post(
         `${BACKEND_URL}/payment/create-intent`,
         { amount: totalAmount },
@@ -158,17 +156,15 @@ const PaymentForm = ({ bus, passenger, onBack, onPay }) => {
       }
 
       if (result.paymentIntent.status === "succeeded") {
-        // ✅ FIX: BACKEND_URL use karo booking create ke liye
         await axios.post(
-          `${BACKEND_URL}/booking/create`,
+          `${BACKEND_URL}/booking/confirm-booking`,
           {
-            busId: bus._id,
+            lockId: lockId,
+            paymentIntentId: result.paymentIntent.id,
             passengerName: passenger.name,
             gender: passenger.gender,
             phone: passenger.phone,
             cnic: passenger.cnic,
-            paymentMethod: "Stripe",
-            paymentNumber: result.paymentIntent.id,
           },
           { headers: { token } }
         );
@@ -202,28 +198,21 @@ const PaymentForm = ({ bus, passenger, onBack, onPay }) => {
 
       <div className="space-y-4 mb-5">
         <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-            Card Number
-          </label>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Card Number</label>
           <div className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-white focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary transition">
             <CardNumberElement options={cardStyle} />
           </div>
-        </div> 
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-              Expiry Date
-            </label>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Expiry Date</label>
             <div className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-white focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary transition">
               <CardExpiryElement options={cardStyle} />
             </div>
           </div>
-
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-              CVC
-            </label>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">CVC</label>
             <div className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-white focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary transition">
               <CardCvcElement options={cardStyle} />
             </div>
@@ -242,7 +231,14 @@ const PaymentForm = ({ bus, passenger, onBack, onPay }) => {
       </div>
 
       <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2 text-sm">
-        <div className="flex justify-between text-gray-600"><span>Ticket Price</span><span>Rs. {bus.price?.toLocaleString()}</span></div>
+        <div className="flex justify-between text-gray-600">
+          <span>Ticket Price ({selectedSeats.length} seat{selectedSeats.length !== 1 ? 's' : ''})</span>
+          <span>Rs. {(bus.price * selectedSeats.length).toLocaleString()}</span>
+        </div>
+        <div className="flex justify-between text-gray-600">
+          <span>Selected Seats</span>
+          <span className="font-medium">{selectedSeats.join(", ")}</span>
+        </div>
         <div className="flex justify-between text-gray-600"><span>Service Fee</span><span>Rs. 50</span></div>
         <div className="h-px bg-gray-200 my-1" />
         <div className="flex justify-between font-bold text-gray-800 text-base">
@@ -267,7 +263,7 @@ const PaymentForm = ({ bus, passenger, onBack, onPay }) => {
   );
 };
 
-const PrintTicket = ({ bus, passenger, bookingId, ticketRef }) => (
+const PrintTicket = ({ bus, passenger, selectedSeats, bookingId, ticketRef }) => (
   <div ref={ticketRef} style={{
     position: "fixed", left: "-9999px", top: 0,
     width: "600px", background: "#fff", fontFamily: "sans-serif",
@@ -283,8 +279,8 @@ const PrintTicket = ({ bus, passenger, bookingId, ticketRef }) => (
         <div style={{ textAlign: "right" }}>
           <p style={{ fontSize: 11, opacity: 0.75, marginBottom: 4 }}>BOOKING ID</p>
           <p style={{ fontSize: 20, fontWeight: 800, letterSpacing: 2 }}>{bookingId}</p>
-          <div style={{ background: "#22c55e", borderRadius: 8, padding: "6px 14px", marginTop: 8, fontSize: 12, fontWeight: 800, color: "#fff", display: "inline-block" }}>
-            ✔ CONFIRMED
+          <div style={{ background: "#eab308", borderRadius: 8, padding: "6px 14px", marginTop: 8, fontSize: 12, fontWeight: 800, color: "#fff", display: "inline-block" }}>
+            ⏳ PENDING
           </div>
         </div>
       </div>
@@ -300,6 +296,7 @@ const PrintTicket = ({ bus, passenger, bookingId, ticketRef }) => (
           { label: "PASSENGER", value: passenger.name },
           { label: "GENDER", value: passenger.gender },
           { label: "PHONE", value: passenger.phone },
+          { label: "SEATS", value: selectedSeats.join(", ") },
           { label: "DEPARTURE DATE", value: bus.date },
           { label: "DEPARTURE TIME", value: bus.departureTime },
           { label: "DURATION", value: bus.duration },
@@ -318,7 +315,7 @@ const PrintTicket = ({ bus, passenger, bookingId, ticketRef }) => (
         </div>
         <div style={{ textAlign: "right" }}>
           <p style={{ fontSize: 10, color: "#7c3aed", fontWeight: 700, letterSpacing: 1.5, marginBottom: 4 }}>AMOUNT PAID</p>
-          <p style={{ fontSize: 22, fontWeight: 800, color: "#7c3aed", margin: 0 }}>Rs. {(bus.price + 50)?.toLocaleString()}</p>
+          <p style={{ fontSize: 22, fontWeight: 800, color: "#7c3aed", margin: 0 }}>Rs. {(bus.price * selectedSeats.length + 50)?.toLocaleString()}</p>
         </div>
       </div>
     </div>
@@ -329,75 +326,54 @@ const PrintTicket = ({ bus, passenger, bookingId, ticketRef }) => (
   </div>
 );
 
-const Confirmation = ({ bus, passenger, paymentId }) => {
+const Confirmation = ({ bus, passenger, selectedSeats, paymentId }) => {
   const navigate = useNavigate();
   const ticketRef = useRef(null);
-  const [downloading, setDownloading] = useState(false);
   const [bookingId] = useState(() => "BK" + Math.random().toString(36).substring(2, 8).toUpperCase());
-
-  const downloadTicket = useCallback(async () => {
-    setDownloading(true);
-    try {
-      const run = async () => {
-        const canvas = await window.html2canvas(ticketRef.current, {
-          scale: 2, useCORS: true, backgroundColor: "#ffffff",
-        });
-        const link = document.createElement("a");
-        link.download = `ticket-${bookingId}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-        setDownloading(false);
-      };
-      if (!window.html2canvas) {
-        const script = document.createElement("script");
-        script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
-        script.onload = run;
-        document.head.appendChild(script);
-      } else {
-        run();
-      }
-    } catch (err) {
-      console.error(err);
-      setDownloading(false);
-    }
-  }, [bookingId]);
 
   return (
     <div className="text-center">
-      <PrintTicket bus={bus} passenger={passenger} bookingId={bookingId} ticketRef={ticketRef} />
-      <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <CheckCircle size={44} className="text-green-500" />
+      <PrintTicket bus={bus} passenger={passenger} selectedSeats={selectedSeats} bookingId={bookingId} ticketRef={ticketRef} />
+
+      {/* ⏳ Pending icon */}
+      <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <Clock size={44} className="text-yellow-500" />
       </div>
-      <h2 className="text-2xl font-extrabold text-gray-800 mb-1">Booking Confirmed!</h2>
-      <p className="text-gray-500 text-sm mb-6">Your ticket has been booked successfully 🎉</p>
-      <div className="bg-white border-2 border-dashed border-primary/30 rounded-2xl p-5 mb-4 text-left relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-primary/50" />
+      <h2 className="text-2xl font-extrabold text-gray-800 mb-1">Booking Submitted! ⏳</h2>
+      <p className="text-gray-500 text-sm mb-6">Your booking is pending admin confirmation. You can download your ticket from My Bookings after approval.</p>
+
+      <div className="bg-white border-2 border-dashed border-yellow-300 rounded-2xl p-5 mb-4 text-left relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 to-yellow-300" />
         <div className="flex justify-between items-start mb-4">
           <div>
             <p className="text-xs text-gray-400 uppercase tracking-wide">Booking ID</p>
             <p className="font-bold text-primary text-lg">{bookingId}</p>
           </div>
-          <div className="bg-primary/10 px-3 py-1 rounded-full">
-            <span className="text-primary text-xs font-bold">✓ CONFIRMED</span>
+          <div className="bg-yellow-100 px-3 py-1 rounded-full">
+            <span className="text-yellow-600 text-xs font-bold">⏳ PENDING</span>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div><p className="text-gray-400 text-xs">Passenger</p><p className="font-semibold">{passenger.name}</p></div>
           <div><p className="text-gray-400 text-xs">Gender</p><p className="font-semibold">{passenger.gender}</p></div>
+          <div><p className="text-gray-400 text-xs">Seats</p><p className="font-semibold">{selectedSeats.join(", ")}</p></div>
           <div><p className="text-gray-400 text-xs">From</p><p className="font-semibold">{bus.fromCity}</p></div>
           <div><p className="text-gray-400 text-xs">To</p><p className="font-semibold">{bus.toCity}</p></div>
           <div><p className="text-gray-400 text-xs">Date</p><p className="font-semibold">{bus.date}</p></div>
           <div><p className="text-gray-400 text-xs">Departure</p><p className="font-semibold">{bus.departureTime}</p></div>
           <div><p className="text-gray-400 text-xs">Bus</p><p className="font-semibold">{bus.busName}</p></div>
-          <div><p className="text-gray-400 text-xs">Amount Paid</p><p className="font-semibold text-primary">Rs. {(bus.price + 50)?.toLocaleString()}</p></div>
+          <div><p className="text-gray-400 text-xs">Amount Paid</p><p className="font-semibold text-primary">Rs. {(bus.price * selectedSeats.length + 50)?.toLocaleString()}</p></div>
         </div>
       </div>
-      <button onClick={downloadTicket} disabled={downloading}
-        className="w-full mb-3 flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all duration-200 disabled:opacity-60">
-        {downloading
-          ? <><span className="w-4 h-4 border-2 border-primary/40 border-t-primary rounded-full animate-spin" /> Generating...</>
-          : <><Download size={18} /> Download Ticket (PNG)</>}
+
+      {/* ❌ Download disabled — pending میں نہیں */}
+      <button
+        disabled
+        title="Ticket download available after admin confirmation"
+        className="w-full mb-3 flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-yellow-300 text-yellow-500 bg-yellow-50 font-semibold cursor-not-allowed opacity-70">
+        <Download size={18} /> Ticket available after admin confirmation
       </button>
+
       <div className="flex gap-3">
         <button onClick={() => navigate("/buses")} className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition text-sm font-medium">
           Book Another
@@ -416,6 +392,8 @@ const BookingPage = () => {
   const bus = location.state?.bus;
 
   const [step, setStep] = useState(0);
+  const [selectedSeats, setSelectedSeats] = useState([]);
+  const [lockId, setLockId] = useState(null);
   const [passenger, setPassenger] = useState({ name: "", phone: "", cnic: "", gender: "" });
   const [paymentId, setPaymentId] = useState("");
 
@@ -443,18 +421,45 @@ const BookingPage = () => {
         <StepBar current={step} />
         <BusSummary bus={bus} />
         <div className="bg-white rounded-3xl shadow-lg p-6 sm:p-8">
-          {step === 0 && <PassengerForm data={passenger} setData={setPassenger} onNext={() => setStep(1)} />}
+          {step === 0 && (
+            <SeatSelector
+              bus={bus}
+              date={bus.date}
+              onSeatsSelected={(seats, lock) => {
+                setSelectedSeats(seats);
+                setLockId(lock);
+                setStep(1);
+              }}
+              onBack={() => navigate("/buses")}
+            />
+          )}
           {step === 1 && (
+            <PassengerForm
+              data={passenger}
+              setData={setPassenger}
+              onNext={() => setStep(2)}
+            />
+          )}
+          {step === 2 && (
             <Elements stripe={stripePromise}>
               <PaymentForm
                 bus={bus}
                 passenger={passenger}
-                onBack={() => setStep(0)}
-                onPay={(pid) => { setPaymentId(pid); setStep(2); }}
+                selectedSeats={selectedSeats}
+                lockId={lockId}
+                onBack={() => setStep(1)}
+                onPay={(pid) => { setPaymentId(pid); setStep(3); }}
               />
             </Elements>
           )}
-          {step === 2 && <Confirmation bus={bus} passenger={passenger} paymentId={paymentId} />}
+          {step === 3 && (
+            <Confirmation
+              bus={bus}
+              passenger={passenger}
+              selectedSeats={selectedSeats}
+              paymentId={paymentId}
+            />
+          )}
         </div>
       </div>
     </div>

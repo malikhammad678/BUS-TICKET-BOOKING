@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 
 const bookingSchema = new mongoose.Schema({
-
   bookingId: {
     type: String,
     unique: true,
@@ -15,9 +14,12 @@ const bookingSchema = new mongoose.Schema({
   bus: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Bus",
-    required: true
+    default: null
   },
-
+  selectedSeats: [{
+    type: Number,
+    default: []
+  }],
   passengerName: {
     type: String,
     required: true,
@@ -38,7 +40,6 @@ const bookingSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-
   paymentMethod: {
     type: String,
     required: true
@@ -53,7 +54,6 @@ const bookingSchema = new mongoose.Schema({
     enum: ["Pending", "Paid"],
     default: "Pending"
   },
-
   bookingStatus: {
     type: String,
     enum: ["Confirmed", "Pending", "Cancelled"],
@@ -62,10 +62,22 @@ const bookingSchema = new mongoose.Schema({
   bookedOn: {
     type: Date,
     default: Date.now
-  }
+  },
+  // Self booking fields
+  fromCity: {
+    type: String,
+    trim: true
+  },
+  toCity: {
+    type: String,
+    trim: true
+  },
+  price: {
+    type: Number
+  },
+  date: { type: String },
+departureTime: { type: String },
+}, { timestamps: true });
 
-}, { timestamps: true })
-
-const Booking = mongoose.models.Booking || mongoose.model("Booking", bookingSchema)
-
+const Booking = mongoose.models.Booking || mongoose.model("Booking", bookingSchema);
 export default Booking;

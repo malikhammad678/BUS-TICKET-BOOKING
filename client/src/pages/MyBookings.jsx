@@ -2,9 +2,11 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Bus, Calendar, Clock, MapPin, Download, Ticket,
-  CheckCircle, XCircle, AlertCircle, ChevronRight, Search, X, Loader2
+  CheckCircle, XCircle, AlertCircle, ChevronRight, Search, X, Loader2, Armchair
 } from "lucide-react";
 import { useAppContext } from "../context/Context";
+
+
 
 const statusConfig = {
   confirmed: {
@@ -25,14 +27,16 @@ const statusConfig = {
 };
 
 const PrintTicket = ({ booking, ticketRef }) => {
+  // Support both regular booking and self booking
   const fromCity = booking.fromCity || booking.bus?.fromCity || "";
   const toCity = booking.toCity || booking.bus?.toCity || "";
-  const busName = booking.bus?.busName || "";
-  const busType = booking.bus?.busType || "";
-  const date = booking.bus?.date || "";
-  const departureTime = booking.bus?.departureTime || "";
-  const duration = booking.bus?.duration || "";
+  const busName = booking.bus?.busName || booking.busName || "Private Trip";
+  const busType = booking.bus?.busType || booking.busType || "AC";
+  const date = booking.date || booking.bus?.date || "—";
+  const departureTime = booking.departureTime || booking.bus?.departureTime || "";
+  const duration = booking.bus?.duration || booking.duration || "2h 30m";
   const price = booking.price || booking.bus?.price || 0;
+  const selectedSeats = booking.selectedSeats || [];
 
   return (
     <div
@@ -77,6 +81,7 @@ const PrintTicket = ({ booking, ticketRef }) => {
             { label: 'PASSENGER', value: booking.passengerName },
             { label: 'GENDER', value: booking.gender },
             { label: 'PHONE', value: booking.phone },
+            { label: 'SEATS', value: selectedSeats.length > 0 ? selectedSeats.join(", ") : "—" },
             { label: 'DEPARTURE DATE', value: date },
             { label: 'DEPARTURE TIME', value: departureTime },
             { label: 'DURATION', value: duration },
@@ -95,7 +100,7 @@ const PrintTicket = ({ booking, ticketRef }) => {
           </div>
           <div style={{ textAlign: 'right' }}>
             <p style={{ fontSize: 10, color: '#7c3aed', fontWeight: 700, letterSpacing: 1.5, marginBottom: 4 }}>AMOUNT PAID</p>
-            <p style={{ fontSize: 22, fontWeight: 800, color: '#7c3aed', margin: 0 }}>Rs. {(price + 50)?.toLocaleString()}</p>
+            <p style={{ fontSize: 22, fontWeight: 800, color: '#7c3aed', margin: 0 }}>Rs. {(price * (selectedSeats.length || 1) + 50)?.toLocaleString()}</p>
           </div>
         </div>
       </div>
@@ -113,25 +118,26 @@ const BookingCard = ({ booking }) => {
   const [downloading, setDownloading] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
-  // ✅ Backend populated data se sahi fields nikalo
   const fromCity = booking.fromCity || booking.bus?.fromCity || "—";
   const toCity = booking.toCity || booking.bus?.toCity || "—";
-  const busName = booking.bus?.busName || "—";
-  const busType = booking.bus?.busType || "—";
-  const date = booking.bus?.date || "—";
-  const departureTime = booking.bus?.departureTime || "—";
-  const duration = booking.bus?.duration || "—";
+  const busName = booking.bus?.busName || booking.busName || "Private Trip";
+  const busType = booking.bus?.busType || booking.busType || "AC";
+  const date = booking.bus?.date || booking.date || "—";
+  const departureTime = booking.departureTime || booking.bus?.departureTime || "—";
+  const duration = booking.bus?.duration || booking.duration || "2h 30m";
   const price = booking.price || booking.bus?.price || 0;
+  const selectedSeats = booking.selectedSeats || [];
   const bookedOn = booking.createdAt
     ? new Date(booking.createdAt).toLocaleDateString()
     : "—";
 
-  // ✅ lowercase status match
   const status = statusConfig[booking.bookingStatus] || statusConfig.pending;
   const isCancelled = booking.bookingStatus === "cancelled";
+const canDownload = booking.bookingStatus === "confirmed";
+
 
   const downloadTicket = useCallback(async () => {
-    if (isCancelled) return;
+    if (!canDownload) return;
     setDownloading(true);
     const run = async () => {
       const canvas = await window.html2canvas(ticketRef.current, {
@@ -184,12 +190,30 @@ const BookingCard = ({ booking }) => {
             </span>
           </div>
 
+          {/* Seats Display */}
+          {selectedSeats.length > 0 && (
+            <div className="mb-4 p-3 bg-primary/5 rounded-xl border border-primary/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Armchair size={16} className="text-primary" />
+                <span className="text-xs font-semibold text-primary uppercase tracking-wide">Booked Seats</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {selectedSeats.map(seat => (
+                  <span key={seat} className="inline-flex items-center justify-center w-10 h-10 bg-primary text-white rounded-xl font-bold shadow-sm">
+                    {seat}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 🔥 FIXED: Date and Time show properly */}
           <div className="flex flex-wrap gap-3 text-xs text-gray-500 mb-4">
             <span className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-lg">
-              <Calendar size={13} className="text-primary" /> {date}
+              <Calendar size={13} className="text-primary" /> {date !== "—" ? date : "Date not set"}
             </span>
             <span className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-lg">
-              <Clock size={13} className="text-primary" /> {departureTime}
+              <Clock size={13} className="text-primary" /> {departureTime !== "—" ? departureTime : "Time not set"}
             </span>
             <span className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-lg">
               <MapPin size={13} className="text-primary" /> {duration}
@@ -198,8 +222,17 @@ const BookingCard = ({ booking }) => {
 
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <p className="text-2xl font-extrabold text-primary">Rs. {(price + 50).toLocaleString()}</p>
-              <p className="text-xs text-gray-400 mt-0.5">ID: <span className="font-mono font-semibold text-gray-600">{booking.bookingId}</span></p>
+              <p className="text-2xl font-extrabold text-primary">
+                Rs. {(price * (selectedSeats.length || 1) + 50).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                ID: <span className="font-mono font-semibold text-gray-600">{booking.bookingId}</span>
+              </p>
+              {selectedSeats.length > 1 && (
+                <p className="text-xs text-gray-400 mt-1">
+                  ({selectedSeats.length} seats × Rs. {price.toLocaleString()} + Rs. 50 fee)
+                </p>
+              )}
             </div>
 
             <div className="flex items-center gap-2">
@@ -213,10 +246,10 @@ const BookingCard = ({ booking }) => {
 
               <button
                 onClick={downloadTicket}
-                disabled={downloading || isCancelled}
-                title={isCancelled ? 'Cancelled tickets cannot be downloaded' : 'Download Ticket'}
+                disabled={downloading || !canDownload}
+                title={!canDownload ? 'Cancelled tickets cannot be downloaded' : 'Download Ticket'}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all
-                  ${isCancelled
+                  ${!canDownload
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     : 'bg-primary text-white hover:scale-105 hover:shadow-md'}`}
               >
@@ -234,13 +267,13 @@ const BookingCard = ({ booking }) => {
                 { label: 'Passenger', value: booking.passengerName },
                 { label: 'Phone', value: booking.phone },
                 { label: 'CNIC', value: booking.cnic },
+                { label: 'Seats', value: selectedSeats.length > 0 ? selectedSeats.join(", ") : "—" },
                 { label: 'Payment Method', value: booking.paymentMethod },
-                { label: 'Payment ID', value: booking.paymentNumber?.slice(0, 16) + "..." || "—" },
                 { label: 'Booked On', value: bookedOn },
               ].map((item, i) => (
                 <div key={i} className="bg-gray-50 rounded-xl px-3 py-2.5">
                   <p className="text-xs text-gray-400 mb-0.5">{item.label}</p>
-                  <p className="font-semibold text-gray-700 text-sm">{item.value}</p>
+                  <p className="font-semibold text-gray-700 text-sm break-words">{item.value}</p>
                 </div>
               ))}
             </div>
@@ -253,14 +286,13 @@ const BookingCard = ({ booking }) => {
 
 const MyBookings = () => {
   const navigate = useNavigate();
-  const { getUserBookings } = useAppContext();  // ✅ Context se real function
+  const { getUserBookings } = useAppContext();
 
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
 
-  // ✅ Real API se bookings fetch karo
   useEffect(() => {
     const fetchBookings = async () => {
       setLoading(true);
@@ -279,7 +311,7 @@ const MyBookings = () => {
     const q = search.toLowerCase();
     const fromCity = b.fromCity || b.bus?.fromCity || "";
     const toCity = b.toCity || b.bus?.toCity || "";
-    const busName = b.bus?.busName || "";
+    const busName = b.bus?.busName || b.busName || "";
     const matchSearch = !q ||
       busName.toLowerCase().includes(q) ||
       fromCity.toLowerCase().includes(q) ||
