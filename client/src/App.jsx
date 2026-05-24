@@ -26,7 +26,6 @@ import SelfBookingSeatSelection from "./pages/SelfBookingSeatSelection"
 import SelfBookingPayment from "./pages/SelfBookingPayment"
 import BookingSuccess from "./pages/BookingSuccess"
 
-// 🆕 Floating Button Component
 const FloatingCreateTripButton = ({ onClick }) => {
   return (
     <button
