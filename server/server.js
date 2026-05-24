@@ -26,6 +26,10 @@ app.use("/api/payment", paymentRouter);
 app.use("/api/contact", contactRouter)
 app.use("/api/self-booking", selfBookingRouter);
 
+app.get("/", (req,res) => {
+    res.json({ message:`Server is running on ${PORT}` })
+})
+
 
 app.listen(PORT, () => {
     connectDatabase()
