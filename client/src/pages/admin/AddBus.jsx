@@ -10,8 +10,6 @@ const cities = [
   "Hyderabad", "Sialkot"
 ];
 
-const today = new Date().toISOString().split("T")[0];
-
 const InputWrapper = ({ label, icon: Icon, children }) => (
   <div>
     <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">
@@ -47,22 +45,9 @@ const AddBus = () => {
   });
 
   const [preview, setPreview] = useState(null);
-  const [dateError, setDateError] = useState("");
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
-    if (name === "date") {
-      if (value < today) {
-        setDateError("Past dates are not allowed. Please select today or a future date.");
-        setForm((prev) => ({ ...prev, date: "" }));
-        e.target.value = "";
-        return;
-      } else {
-        setDateError("");
-      }
-    }
-
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -79,10 +64,6 @@ const AddBus = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (form.date < today) {
-      setDateError("Past dates are not allowed. Please select today or a future date.");
-      return;
-    }
     addNewBus(form);
   };
 
@@ -169,22 +150,16 @@ const AddBus = () => {
         <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5">
           <h2 className="text-xs sm:text-sm font-bold text-primary mb-3 sm:mb-4 uppercase tracking-wider">Schedule</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-            <div>
-              <InputWrapper label="Date" icon={Calendar}>
-                <input
-                  type="date"
-                  name="date"
-                  value={form.date}
-                  onChange={handleChange}
-                  min={today}
-                  required
-                  className={`${inputClass} ${dateError ? "border-red-400 focus:border-red-400 focus:ring-red-200" : ""}`}
-                />
-              </InputWrapper>
-              {dateError && (
-                <p className="text-[11px] text-red-500 mt-1.5 font-medium">{dateError}</p>
-              )}
-            </div>
+            <InputWrapper label="Date" icon={Calendar}>
+              <input
+                type="date"
+                name="date"
+                value={form.date}
+                onChange={handleChange}
+                required
+                className={inputClass}
+              />
+            </InputWrapper>
             <InputWrapper label="Departure Time" icon={Clock}>
               <input
                 name="departureTime"
