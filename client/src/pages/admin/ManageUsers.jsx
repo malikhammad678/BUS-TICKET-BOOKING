@@ -1,22 +1,29 @@
 import { useState } from "react";
-import { Users2, Search, Trash2, ShieldOff, ShieldCheck } from "lucide-react";
+import { Users2, Search, Trash2, ShieldOff, ShieldCheck, RefreshCw } from "lucide-react";
 import { useAppContext } from "../../context/Context";
 
 const ManageallUsers = () => {
-  const { allUsers, updateUserStatus, deleteUser } = useAppContext();
+  const { allUsers, updateUserStatus, deleteUser, getUsers } = useAppContext();
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false)
   const [activeFilter, setActiveFilter] = useState("All");
 
   const filtered = allUsers.filter((u) => {
     const matchSearch =
       u.name.toLowerCase().includes(search.toLowerCase()) ||
       u.email.toLowerCase().includes(search.toLowerCase());
-    const matchFilter =
+    const matchFilter = 
       activeFilter === "All" ||
       (activeFilter === "active" && !u.isBlocked) ||
       (activeFilter === "blocked" && u.isBlocked);
     return matchSearch && matchFilter;
   });
+
+  const handleRefresh = async () => {
+  setLoading(true);
+  await getUsers();
+  setLoading(false);
+};
 
   const handleToggleBlock = (id) => updateUserStatus(id);
   const handleDelete = (id) => deleteUser(id);
@@ -24,25 +31,32 @@ const ManageallUsers = () => {
   return (
     <div className="space-y-4 sm:space-y-5">
 
-      {/* Header */}
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-800 tracking-tight">Manage Users</h1>
-          <p className="text-xs sm:text-sm text-gray-400 mt-0.5">{allUsers.length} registered Users</p>
-        </div>
-        <div className="hidden sm:flex items-center gap-2 shrink-0">
-          <span className="text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-green-100 text-green-600 border-green-200">
-            {allUsers.filter((u) => !u.isBlocked).length} Active
-          </span>
-          <span className="text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-red-50 text-red-500 border-red-200">
-            {allUsers.filter((u) => u.isBlocked).length} Blocked
-          </span>
-        </div>
-      </div>
+  <div>
+    <h1 className="text-xl sm:text-2xl font-extrabold text-gray-800 tracking-tight">Manage Users</h1>
+    <p className="text-xs sm:text-sm text-gray-400 mt-0.5">{allUsers.length} registered Users</p>
+  </div>
+  <div className="flex items-center gap-2 shrink-0">
+    <button
+      onClick={handleRefresh}
+      className="flex items-center gap-2 border border-gray-200 text-gray-600 px-4 py-2 rounded-xl text-sm hover:bg-gray-50 transition"
+    >
+      <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+      Refresh
+    </button>
+    <div className="hidden sm:flex items-center gap-2">
+      <span className="text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-green-100 text-green-600 border-green-200">
+        {allUsers.filter((u) => !u.isBlocked).length} Active
+      </span>
+      <span className="text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-red-50 text-red-500 border-red-200">
+        {allUsers.filter((u) => u.isBlocked).length} Blocked
+      </span>
+    </div>
+  </div>
+</div>
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
-        {/* Search + Filter */}
         <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-100 flex flex-col gap-3">
           <div className="relative w-full sm:max-w-sm">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -67,8 +81,6 @@ const ManageallUsers = () => {
             ))}
           </div>
         </div>
-
-        {/* Desktop Table */}
         <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -135,7 +147,6 @@ const ManageallUsers = () => {
           </table>
         </div>
 
-        {/* Mobile Card View */}
         <div className="sm:hidden divide-y divide-gray-50">
           {filtered.length > 0 ? filtered.map((u) => (
             <div key={u._id} className="p-4 flex items-center gap-3">
@@ -170,7 +181,6 @@ const ManageallUsers = () => {
           )}
         </div>
 
-        {/* Footer */}
         <div className="px-4 sm:px-5 py-3 border-t border-gray-100 bg-gray-50/50">
           <p className="text-xs text-gray-400">
             Showing <span className="font-semibold text-gray-600">{filtered.length}</span> of{" "}

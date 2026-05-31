@@ -63,7 +63,6 @@ const bookingSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  // Self booking fields
   fromCity: {
     type: String,
     trim: true

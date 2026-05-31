@@ -2,6 +2,8 @@ import TemporaryBus from "../models/TemporaryBus.js";
 import Booking from "../models/booking.model.js";
 import User from "../models/user.model.js";
 import SeatLock from "../models/SeatLock.model.js";
+import { sendBookingEmail } from "../utils/sendEmail.js";
+import { sendBookingSMS } from "../utils/sendSMS.js";
 
 const generateBookingId = () => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -177,6 +179,39 @@ export const confirmSelfBooking = async (req, res) => {
       toCity: tempBus.toCity,
       price: tempBus.price
     });
+
+     try {
+      const user = await User.findById(userId);
+      if (user?.email) {
+        await sendBookingEmail(user.email, {
+          bookingId: booking.bookingId,
+          passengerName,
+          selectedSeats: lock.seatNumbers,
+          fromCity: tempBus.fromCity,
+          toCity: tempBus.toCity,
+          date: tempBus.date,
+          departureTime: tempBus.departureTime,
+          totalAmount: (tempBus.price * lock.seatNumbers.length + 50).toLocaleString(),
+        });
+      }
+    } catch (emailErr) {
+      console.error("Email failed (booking still saved):", emailErr.message);
+    }
+
+    try {
+      await sendBookingSMS(phone, {
+        bookingId: booking.bookingId,
+        passengerName,
+        selectedSeats: lock.seatNumbers,
+        fromCity: tempBus.fromCity,
+        toCity: tempBus.toCity,
+        date: tempBus.date,
+        departureTime: tempBus.departureTime,
+        totalAmount: (tempBus.price * lock.seatNumbers.length + 50).toLocaleString(),
+      });
+    } catch (smsErr) {
+      console.error("SMS failed (booking still saved):", smsErr.message);
+    }
     
     tempBus.bookingId = booking._id;
     tempBus.isActive = false;

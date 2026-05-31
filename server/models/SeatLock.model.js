@@ -25,7 +25,6 @@ const seatLockSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Auto cleanup expired locks
 seatLockSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const SeatLock = mongoose.models.SeatLock || mongoose.model("SeatLock", seatLockSchema);

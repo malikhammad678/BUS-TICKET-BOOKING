@@ -358,7 +358,10 @@ export const AppContextProvider = ({ children }) => {
         allUsers, addNewBus, getBuses, loading, deleteBus, deleteBooking, updateStatus, updateUserStatus,
         deleteUser, userToken, setUserToken, userLogin, messages, deleteMessages, sendMessage, webBuses,
         logout,
-        getUserBookings  
+        getMessages,
+        getAllBookings,
+        getUserBookings,
+        getUsers
     }
 
     return <AppContext.Provider value={value}>

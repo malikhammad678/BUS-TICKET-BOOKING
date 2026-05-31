@@ -1,13 +1,20 @@
-import { MessageSquare, Search, Trash2, Eye, X, Mail, Phone } from "lucide-react";
+import { MessageSquare, Search, Trash2, Eye, X, Mail, Phone, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { useAppContext } from "../../context/Context";
 
 const ManageMessages = () => {
-  const { messages, deleteMessages } = useAppContext();
+  const { messages, deleteMessages, getMessages } = useAppContext();
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
 
   const deleteMessage = (id) => deleteMessages(id);
+
+  const handleRefresh = async () => {
+  setLoading(true);
+  await getMessages();
+  setLoading(false);
+};
 
   const filtered = messages?.filter((m) => {
     const q = search.toLowerCase();
@@ -22,20 +29,27 @@ const ManageMessages = () => {
   return (
     <div className="space-y-4 sm:space-y-5">
 
-      {/* Header */}
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-800 tracking-tight">Manage Messages</h1>
-          <p className="text-xs sm:text-sm text-gray-400 mt-0.5">{messages?.length} total messages</p>
-        </div>
-        <span className="hidden sm:flex text-xs font-semibold px-3 py-1.5 rounded-full border bg-blue-50 text-blue-500 border-blue-200 shrink-0">
-          {messages.length} Inbox
-        </span>
-      </div>
+     <div className="flex items-center justify-between gap-3">
+  <div>
+    <h1 className="text-xl sm:text-2xl font-extrabold text-gray-800 tracking-tight">Manage Messages</h1>
+    <p className="text-xs sm:text-sm text-gray-400 mt-0.5">{messages?.length} total messages</p>
+  </div>
+  <div className="flex items-center gap-2 shrink-0">
+    <button
+      onClick={handleRefresh}
+      className="flex items-center gap-2 border border-gray-200 text-gray-600 px-4 py-2 rounded-xl text-sm hover:bg-gray-50 transition"
+    >
+      <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+      Refresh
+    </button>
+    <span className="hidden sm:flex text-xs font-semibold px-3 py-1.5 rounded-full border bg-blue-50 text-blue-500 border-blue-200">
+      {messages.length} Inbox
+    </span>
+  </div>
+</div>
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
-        {/* Search */}
         <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-100">
           <div className="relative w-full sm:max-w-sm">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -49,7 +63,6 @@ const ManageMessages = () => {
           </div>
         </div>
 
-        {/* Desktop Table */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -114,7 +127,6 @@ const ManageMessages = () => {
           </table>
         </div>
 
-        {/* Mobile Card View */}
         <div className="md:hidden divide-y divide-gray-50">
           {filtered.length > 0 ? filtered.map((m) => (
             <div key={m._id} className="p-4 space-y-2">
@@ -148,7 +160,6 @@ const ManageMessages = () => {
           )}
         </div>
 
-        {/* Footer */}
         <div className="px-4 sm:px-5 py-3 border-t border-gray-100 bg-gray-50/50">
           <p className="text-xs text-gray-400">
             Showing <span className="font-semibold text-gray-600">{filtered.length}</span> of{" "}
@@ -157,7 +168,6 @@ const ManageMessages = () => {
         </div>
       </div>
 
-      {/* View Modal */}
       {selected && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-5 sm:p-6 space-y-4 relative" onClick={(e) => e.stopPropagation()}>

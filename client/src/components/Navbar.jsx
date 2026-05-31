@@ -23,7 +23,6 @@ const Navbar = () => {
         <>
             <header className="fixed top-0 left-0 w-full bg-white z-50 px-4 sm:px-6 md:px-10 lg:px-20 py-4 flex justify-between items-center border-b border-gray-200 shadow-sm">
 
-                {/* Logo */}
                 <Link to={"/"} className="flex items-center gap-2 text-black font-medium">
                     <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg bg-primary transition-all duration-200 hover:scale-105">
                         <img src={logo} className="h-6 w-6 sm:h-7 sm:w-7" alt="BusGo Logo" />
@@ -51,7 +50,6 @@ const Navbar = () => {
                     ))}
                 </nav>
 
-                {/* Right Side: Auth + Hamburger */}
                 <div className="flex items-center gap-3">
 
                     {!userToken ? (
@@ -89,7 +87,6 @@ const Navbar = () => {
                         </div>
                     )}
 
-                    {/* Hamburger - mobile only */}
                     <button
                         className="md:hidden flex items-center justify-center p-1 rounded-md hover:bg-gray-100 transition"
                         onClick={() => setOpenMenu(true)}
@@ -100,7 +97,6 @@ const Navbar = () => {
                 </div>
             </header>
 
-            {/* ===== MOBILE OVERLAY BACKDROP ===== */}
             {openMenu && (
                 <div
                     className="fixed inset-0 bg-black/30 z-50 md:hidden"
@@ -108,11 +104,9 @@ const Navbar = () => {
                 />
             )}
 
-            {/* ===== MOBILE SIDEBAR MENU ===== */}
             <div className={`fixed top-0 right-0 w-[75%] max-w-[300px] h-full bg-white border-l-2 border-primary z-60 md:hidden transition-transform duration-300 ease-in-out shadow-2xl
                 ${openMenu ? 'translate-x-0' : 'translate-x-full'}`}
             >
-                {/* Close Button */}
                 <button
                     onClick={() => setOpenMenu(false)}
                     className="absolute top-5 right-5 w-9 h-9 flex items-center justify-center bg-primary rounded-full text-white hover:scale-105 transition-transform"
@@ -121,7 +115,6 @@ const Navbar = () => {
                     <X size={18} />
                 </button>
 
-                {/* Mobile Logo */}
                 <div className="pt-6 pl-6 pb-4 border-b border-gray-100">
                     <Link to={"/"} onClick={() => setOpenMenu(false)} className="flex items-center gap-2">
                         <div className="w-8 h-8 flex items-center justify-center rounded-md bg-primary">
@@ -131,7 +124,6 @@ const Navbar = () => {
                     </Link>
                 </div>
 
-                {/* Mobile Links */}
                 <nav className="pt-6 pl-6 flex flex-col gap-1">
                     {[
                         { to: "/", label: "Home" },
@@ -156,7 +148,6 @@ const Navbar = () => {
                     ))}
                 </nav>
 
-                {/* Mobile Auth */}
                 <div className="absolute bottom-8 left-6 right-6">
                     {!userToken ? (
                         <button

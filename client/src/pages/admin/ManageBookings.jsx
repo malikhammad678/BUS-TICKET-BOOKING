@@ -1,4 +1,4 @@
-import { BookOpen, MapPin, Calendar, Search, Trash2, Check, X, Armchair, Clock } from "lucide-react";
+import { BookOpen, MapPin, Calendar, Search, Trash2, RefreshCw ,Check, X, Armchair, Clock } from "lucide-react";
 import { useState } from "react";
 import { useAppContext } from "../../context/Context";
 
@@ -20,9 +20,10 @@ const getStatusText = (status) => {
 };
 
 const ManageBookings = () => {
-  const { bookings, deleteBooking, updateStatus } = useAppContext();
+  const { bookings, deleteBooking, updateStatus, getAllBookings } = useAppContext();
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
+  const [loading, setLoading] = useState(false);
 
   const filtered = bookings?.filter((b) => {
     const matchSearch =
@@ -36,6 +37,12 @@ const ManageBookings = () => {
       b.bookingStatus?.toLowerCase() === activeFilter.toLowerCase();
     return matchSearch && matchFilter;
   });
+
+  const handleRefresh = async () => {
+  setLoading(true);
+  await getAllBookings(); 
+  setLoading(false);
+};
 
   const handleConfirm = (id) => updateStatus(id, "confirmed");
   const handleCancel = (id) => updateStatus(id, "cancelled");
@@ -67,24 +74,34 @@ const ManageBookings = () => {
   return (
     <div className="space-y-4 sm:space-y-5">
 
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-800 tracking-tight">Manage Bookings</h1>
-          <p className="text-xs sm:text-sm text-gray-400 mt-0.5">{bookings?.length} total bookings</p>
-        </div>
-        <div className="hidden sm:flex items-center gap-2 shrink-0">
-          {["Confirmed", "Pending", "Cancelled"].map((s) => (
-            <span key={s} className={`text-xs font-semibold px-2.5 py-1.5 rounded-full border ${getStatusBadgeClass(s)}`}>
-              {bookings?.filter(b => b.bookingStatus?.toLowerCase() === s.toLowerCase()).length} {s}
-            </span>
-          ))}
-        </div>
-      </div>
+    
+<div className="flex items-start justify-between gap-3">
+  <div>
+    <h1 className="text-xl sm:text-2xl font-extrabold text-gray-800 tracking-tight">Manage Bookings</h1>
+    <p className="text-xs sm:text-sm text-gray-400 mt-0.5">{bookings?.length} total bookings</p>
+  </div>
+
+  <div className="flex items-center gap-2 shrink-0">
+    <button
+      onClick={handleRefresh}
+      className="flex items-center gap-2 border border-gray-200 text-gray-600 px-4 py-2 rounded-xl text-sm hover:bg-gray-50 transition"
+    >
+      <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+      Refresh
+    </button>
+    <div className="hidden sm:flex items-center gap-2">
+      {["Confirmed", "Pending", "Cancelled"].map((s) => (
+        <span key={s} className={`text-xs font-semibold px-2.5 py-1.5 rounded-full border ${getStatusBadgeClass(s)}`}>
+          {bookings?.filter(b => b.bookingStatus?.toLowerCase() === s.toLowerCase()).length} {s}
+        </span>
+      ))}
+    </div>
+  </div>
+</div>
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
-        {/* Search + Filter */}
+  
         <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-100 flex flex-col gap-3">
           <div className="relative w-full sm:max-w-sm">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -110,7 +127,7 @@ const ManageBookings = () => {
           </div>
         </div>
 
-        {/* Desktop Table */}
+  
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -242,7 +259,6 @@ const ManageBookings = () => {
           </table>
         </div>
 
-        {/* Mobile Card View */}
         <div className="md:hidden divide-y divide-gray-50">
           {filtered?.length > 0 ? filtered.map((b) => (
             <div key={b.bookingId} className="p-4 space-y-2">
@@ -338,8 +354,6 @@ const ManageBookings = () => {
             </div>
           )}
         </div>
-
-        {/* Footer */}
         <div className="px-4 sm:px-5 py-3 border-t border-gray-100 bg-gray-50/50">
           <p className="text-xs text-gray-400">
             Showing <span className="font-semibold text-gray-600">{filtered?.length}</span> of{" "}

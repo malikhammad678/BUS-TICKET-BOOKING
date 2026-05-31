@@ -19,10 +19,8 @@ const Contact = () => {
   return (
     <div className="px-4 sm:px-6 md:px-10 lg:px-20 bg-gray-50">
 
-      {/* ── Section 1: Contact Info + Form ── */}
       <div className="flex md:flex-row flex-col items-start pt-28 sm:pt-32 md:pt-40 justify-between pb-16 sm:pb-20 gap-10 md:gap-8 lg:gap-12">
 
-        {/* Left: Info */}
         <div className="w-full md:w-[45%]">
           <h1 className="text-3xl sm:text-4xl font-semibold text-primary">Contact Us</h1>
           <p className="text-gray-500 my-3 text-sm sm:text-base leading-relaxed">
@@ -44,7 +42,6 @@ const Contact = () => {
           </div>
         </div>
 
-        {/* Right: Form */}
         <div className="w-full md:w-[55%] p-5 sm:p-8 shadow-2xl rounded-lg bg-white">
           <h2 className="text-2xl sm:text-3xl font-medium">Get In Touch</h2>
           <p className="text-sm text-gray-500 mt-1 mb-3">You can reach us anytime</p>

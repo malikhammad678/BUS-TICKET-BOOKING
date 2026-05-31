@@ -1,4 +1,4 @@
-import { LayoutDashboard, Bus, PlusCircle, BookOpen, ChevronRight, Users2, MessageCircleMoreIcon } from "lucide-react";
+import { LayoutDashboard, Bus, PlusCircle, BookOpen, ChevronRight, Users2, MessageCircleMoreIcon, DollarSign, Newspaper } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 const navItems = [
@@ -8,12 +8,13 @@ const navItems = [
   { label: "Manage Bookings", icon: BookOpen, path: "/owner/manage-bookings" },
   { label: "Manage Users", icon: Users2, path: "/owner/manage-users" },
   { label: "Messages", icon: MessageCircleMoreIcon, path: "/owner/manage-messages" },
+  { label: "Set Rates", icon: DollarSign, path: "/owner/set-rates" },
+  { label: "Newsletter", icon: Newspaper, path: "/owner/newsletter" },
 ];
 
 const Sidebar = () => {
   return (
     <>
-      {/* ── Desktop Sidebar ── */}
       <aside className="hidden md:flex w-56 lg:w-64 min-h-screen bg-white border-r border-gray-200 flex-col">
         <nav className="flex-1 px-3 lg:px-4 py-6 space-y-1">
           {navItems.map(({ label, icon: Icon, path }) => (
@@ -46,29 +47,32 @@ const Sidebar = () => {
         </nav>
       </aside>
 
-      {/* ── Mobile Bottom Nav ── */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 flex items-center justify-around px-1 py-2">
-        {navItems.map(({ label, icon: Icon, path }) => (
-          <NavLink
-            key={path}
-            to={path}
-            className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-all duration-200
-              ${isActive ? "text-primary" : "text-gray-400"}`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center
-                  ${isActive ? "bg-primary/10" : ""}`}>
-                  <Icon size={18} />
-                </div>
-                <span className="text-[9px] font-semibold leading-none">{label.split(" ")[0]}</span>
-              </>
-            )}
-          </NavLink>
-        ))}
-      </nav>
+<nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200">
+  <div className="flex items-center overflow-x-auto scrollbar-hide px-1 py-2 gap-1">
+    {navItems.map(({ label, icon: Icon, path }) => (
+      <NavLink
+        key={path}
+        to={path}
+        className={({ isActive }) =>
+          `flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all duration-200 shrink-0
+          ${isActive ? "text-primary" : "text-gray-400"}`
+        }
+      >
+        {({ isActive }) => (
+          <>
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center
+              ${isActive ? "bg-primary/10" : ""}`}>
+              <Icon size={18} />
+            </div>
+            <span className="text-[9px] font-semibold leading-none whitespace-nowrap">
+              {label.split(" ")[0]}
+            </span>
+          </>
+        )}
+      </NavLink>
+    ))}
+  </div>
+</nav>
     </>
   );
 };

@@ -6,8 +6,6 @@ import {
 } from "lucide-react";
 import { useAppContext } from "../context/Context";
 
-
-
 const statusConfig = {
   confirmed: {
     icon: <CheckCircle size={14} />,
@@ -190,7 +188,6 @@ const canDownload = booking.bookingStatus === "confirmed";
             </span>
           </div>
 
-          {/* Seats Display */}
           {selectedSeats.length > 0 && (
             <div className="mb-4 p-3 bg-primary/5 rounded-xl border border-primary/20">
               <div className="flex items-center gap-2 mb-2">
@@ -207,7 +204,6 @@ const canDownload = booking.bookingStatus === "confirmed";
             </div>
           )}
 
-          {/* 🔥 FIXED: Date and Time show properly */}
           <div className="flex flex-wrap gap-3 text-xs text-gray-500 mb-4">
             <span className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-lg">
               <Calendar size={13} className="text-primary" /> {date !== "—" ? date : "Date not set"}
@@ -330,7 +326,6 @@ const MyBookings = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
 
-      {/* Header */}
       <div className="relative bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-white overflow-hidden pt-20">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-10 -right-10 w-72 h-72 bg-white/5 rounded-full" />
@@ -391,10 +386,8 @@ const MyBookings = () => {
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-3xl mx-auto px-4 py-8">
 
-        {/* Filter Tabs */}
         <div className="flex items-center gap-2 mb-6 flex-wrap">
           {filters.map(f => {
             const colors = {
@@ -422,7 +415,6 @@ const MyBookings = () => {
           })}
         </div>
 
-        {/* Loading State */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-3">
             <Loader2 size={36} className="text-primary animate-spin" />

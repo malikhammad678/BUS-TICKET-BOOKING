@@ -3,6 +3,8 @@ import User from "../models/user.model.js";
 import Bus from "../models/bus.model.js";
 import SeatLock from "../models/SeatLock.model.js";
 import BusSchedule from "../models/BusSchedule.model.js";
+import { sendBookingEmail, sendStatusEmail } from "../utils/sendEmail.js";
+import { sendBookingSMS, sendStatusSMS } from "../utils/sendSMS.js";
 
 const generateBookingId = () => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -13,7 +15,6 @@ const generateBookingId = () => {
   return id;
 };
 
-// 🆕 Lock seats before payment
 export const lockSeats = async (req, res) => {
   try {
     const { busId, date, seatNumbers } = req.body;
@@ -28,7 +29,6 @@ export const lockSeats = async (req, res) => {
       return res.status(404).json({ success: false, message: "Bus not found" });
     }
 
-    // Check if seats are already booked
     const schedule = await BusSchedule.findOne({ busId, date });
     if (schedule) {
       const alreadyBooked = seatNumbers.some(seat => schedule.bookedSeats.includes(seat));
@@ -37,7 +37,6 @@ export const lockSeats = async (req, res) => {
       }
     }
 
-    // Check if seats are locked by another user
     const existingLock = await SeatLock.findOne({
       busId,
       date,
@@ -53,10 +52,8 @@ export const lockSeats = async (req, res) => {
       });
     }
 
-    // Remove existing locks by this user
     await SeatLock.deleteMany({ busId, date, userId });
 
-    // Create new lock
     const lock = await SeatLock.create({
       busId,
       date,
@@ -78,7 +75,6 @@ export const lockSeats = async (req, res) => {
   }
 };
 
-// 🆕 Confirm booking after payment
 export const confirmBooking = async (req, res) => {
   try {
     const { lockId, paymentIntentId, passengerName, gender, phone, cnic } = req.body;
@@ -106,7 +102,6 @@ export const confirmBooking = async (req, res) => {
       return res.status(404).json({ success: false, message: "Bus not found" });
     }
 
-    // Update bus schedule
     let schedule = await BusSchedule.findOne({ busId: lock.busId, date: lock.date });
     if (!schedule) {
       schedule = await BusSchedule.create({
@@ -120,7 +115,7 @@ export const confirmBooking = async (req, res) => {
     schedule.bookedSeats.push(...lock.seatNumbers);
     await schedule.save();
 
-    // Generate booking ID
+    
     let bookingId;
     let isUnique = false;
     while (!isUnique) {
@@ -144,6 +139,40 @@ export const confirmBooking = async (req, res) => {
   bookingStatus: "Pending"  
 });
 
+
+ try {
+      const user = await User.findById(userId);
+      if (user?.email) {
+        await sendBookingEmail(user.email, {
+          bookingId: booking.bookingId,
+          passengerName,
+          selectedSeats: lock.seatNumbers,
+          fromCity: bus.fromCity,
+          toCity: bus.toCity,
+          date: lock.date,
+          departureTime: bus.departureTime,
+          totalAmount: (bus.price * lock.seatNumbers.length + 50).toLocaleString(),
+        });
+      }
+    } catch (emailErr) {
+      console.error("Email failed (booking still saved):", emailErr.message);
+    }
+
+    try {
+      await sendBookingSMS(phone, {
+        bookingId: booking.bookingId,
+        passengerName,
+        selectedSeats: lock.seatNumbers,
+        fromCity: bus.fromCity,
+        toCity: bus.toCity,
+        date: lock.date,
+        departureTime: bus.departureTime,
+        totalAmount: (bus.price * lock.seatNumbers.length + 50).toLocaleString(),
+      });
+    } catch (smsErr) {
+      console.error("SMS failed (booking still saved):", smsErr.message);
+    }
+
     await SeatLock.findByIdAndDelete(lockId);
 
     await User.findByIdAndUpdate(userId, {
@@ -166,7 +195,6 @@ export const confirmBooking = async (req, res) => {
   }
 };
 
-// 🆕 Get available seats
 export const getAvailableSeats = async (req, res) => {
   try {
     const { busId } = req.params;
@@ -209,7 +237,6 @@ export const getAvailableSeats = async (req, res) => {
   }
 };
 
-// Existing functions (unchanged)
 export const createBooking = async (req, res) => {
   try {
     const {
@@ -309,17 +336,70 @@ export const updateBookingStatus = async (req, res) => {
   try {
     const { bookingStatus } = req.body;
 
+    const bookingRaw = await Booking.findById(req.params.id);
+    if (!bookingRaw) {
+      return res.status(404).json({ success: false, message: "Booking not found" });
+    }
+
+    const phone = bookingRaw.phone;
+
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,
       { bookingStatus },
       { new: true }
     ).populate("bus").populate("user", "-password");
 
-    if (!booking) {
-      return res.status(404).json({ success: false, message: "Booking not found" });
+    if (bookingStatus === "confirmed" || bookingStatus === "cancelled") {
+      
+      const fromCity = booking.fromCity || booking.bus?.fromCity || "—";
+      const toCity = booking.toCity || booking.bus?.toCity || "—";
+      const date = booking.date || booking.bus?.date || "—";
+      const departureTime = booking.departureTime || booking.bus?.departureTime || "—";
+      const price = booking.price || booking.bus?.price || 0;
+      
+      const selectedSeats = Array.isArray(booking.selectedSeats) && booking.selectedSeats.length > 0
+        ? booking.selectedSeats
+        : ["N/A"];
+      
+      const totalAmount = (price * (booking.selectedSeats?.length || 1) + 50).toLocaleString();
+
+      const notifData = {
+        status: bookingStatus,
+        bookingId: booking.bookingId,
+        passengerName: booking.passengerName,
+        selectedSeats,   
+        fromCity,
+        toCity,
+        date,
+        departureTime,
+        totalAmount,
+      };
+
+      try {
+        if (booking.user?.email) {
+          await sendStatusEmail(booking.user.email, notifData);
+        }
+      } catch (e) {
+        console.error("Status email failed:", e.message);
+      }
+
+      try {
+        if (phone) {
+          console.log("Sending SMS to:", phone); 
+          await sendStatusSMS(phone, notifData);
+        } else {
+          console.warn("No phone number found for booking:", booking.bookingId);
+        }
+      } catch (e) {
+        console.error("Status SMS failed:", e.message);
+      }
     }
 
-    return res.status(200).json({ success: true, message: "Status updated successfully", booking });
+    return res.status(200).json({
+      success: true,
+      message: "Status updated successfully",
+      booking
+    });
 
   } catch (error) {
     console.error("Update booking error:", error);

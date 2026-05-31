@@ -2,15 +2,30 @@ import { Users, Bus, BookOpen, MapPin, Clock, Calendar } from "lucide-react";
 import { useAppContext } from "../../context/Context";
 
 const statusColor = (status) => {
-  if (status === "Confirmed") return "bg-green-100 text-green-600";
-  if (status === "Pending") return "bg-yellow-100 text-yellow-600";
-  if (status === "Cancelled") return "bg-red-100 text-red-500";
+  const s = status?.toLowerCase();
+  if (s === "confirmed") return "bg-green-100 text-green-600";
+  if (s === "pending") return "bg-yellow-100 text-yellow-600";
+  if (s === "cancelled") return "bg-red-100 text-red-500";
   return "bg-gray-100 text-gray-500";
 };
 
 const Dashboard = () => {
 
   const { isOwnerLogin, totalNoBuses, totalNoUsers, totalNoBookings, bookings, buses, allUsers, navigate } = useAppContext()
+
+  const getRoute = (b) => {
+    const from = b.fromCity || b.bus?.fromCity;
+    const to   = b.toCity   || b.bus?.toCity;
+    return from && to ? `${from} → ${to}` : "—";
+  };
+
+  const getDate  = (b) => b.date  || b.bus?.date  || "—";
+
+  const getPrice = (b) => {
+    const price = b.price || b.bus?.price || 0;
+    const seats = b.selectedSeats?.length || 1;
+    return price * seats;
+  };
 
   const statsCards = [
     {
@@ -39,13 +54,11 @@ const Dashboard = () => {
   return (
     <div className="space-y-4 sm:space-y-6">
 
-      {/* Header */}
       <div>
         <h1 className="text-xl sm:text-2xl font-bold text-gray-800 tracking-tight">Dashboard</h1>
         <p className="text-xs sm:text-sm text-gray-400 mt-0.5">Welcome back, {isOwnerLogin?.email}</p>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {statsCards.map(({ label, value, icon: Icon, color, border }) => (
           <div key={label} className={`bg-white rounded-2xl border ${border} p-4 sm:p-5 flex items-center gap-3 sm:gap-4`}>
@@ -60,7 +73,6 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Recent Bookings */}
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100">
           <h2 className="font-semibold text-primary text-sm sm:text-base">Recent Bookings</h2>
@@ -82,17 +94,17 @@ const Dashboard = () => {
                 <div className="min-w-0">
                   <p className="text-xs sm:text-sm font-bold text-gray-800 truncate">{b.passengerName}</p>
                   <p className="text-[10px] sm:text-xs text-gray-400 flex items-center gap-1 mt-0.5">
-                    <MapPin size={9} /> {b?.bus?.fromCity} → {b?.bus?.toCity}
+                    <MapPin size={9} /> {getRoute(b)}
                   </p>
                 </div>
               </div>
 
               <div className="hidden lg:flex items-center gap-1 text-xs text-gray-400 shrink-0">
-                <Calendar size={11} /> {b.bus?.date}
+                <Calendar size={11} /> {getDate(b)}
               </div>
 
               <div className="text-xs sm:text-sm font-bold text-gray-700 shrink-0">
-                Rs. {b.bus?.price.toLocaleString()}
+                Rs. {getPrice(b).toLocaleString()}
               </div>
 
               <span className={`text-[10px] sm:text-[11px] font-semibold px-2 sm:px-3 py-1 rounded-full shrink-0 ${statusColor(b.bookingStatus)}`}>
@@ -104,7 +116,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Recent Buses */}
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100">
           <h2 className="font-semibold text-primary text-sm sm:text-base">Recent Buses</h2>
@@ -150,7 +161,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Recent Users */}
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100">
           <h2 className="font-semibold text-base text-primary">Recent Users</h2>

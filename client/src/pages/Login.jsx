@@ -32,9 +32,7 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        {/* Card */}
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
-          {/* Top banner */}
           <div className="bg-gradient-to-br from-primary to-primary/80 px-8 pt-10 pb-14 text-white text-center relative">
             <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
               <Bus size={22} className="text-primary" />
@@ -49,7 +47,6 @@ const Login = () => {
             </p>
           </div>
 
-          {/* Form */}
           <div className="px-8 pt-12 pb-8">
             <form onSubmit={handleSubmit} className="space-y-4">
               {state === "Sign Up" && (

@@ -20,7 +20,7 @@ const About = () => {
                         />
                     </div>
 
-                    {/* ── Text Content ── */}
+            
                     <div className="w-full md:w-[55%] text-slate-600">
 
                         <h1 className="text-lg sm:text-xl uppercase font-semibold text-slate-700">Who we are?</h1>

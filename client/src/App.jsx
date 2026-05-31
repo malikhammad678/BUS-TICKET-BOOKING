@@ -24,6 +24,8 @@ import SelfBookingForm from "./components/SelfBookingForm"
 import SelfBookingSeatSelection from "./pages/SelfBookingSeatSelection"
 import SelfBookingPayment from "./pages/SelfBookingPayment"
 import BookingSuccess from "./pages/BookingSuccess"
+import RouteRatesManager from "./pages/admin/RouteRatesManager"
+import NewsletterAdmin from "./pages/admin/NewsletterAdmin"
 
 const FloatingCreateTripButton = ({ onClick }) => {
   return (
@@ -75,7 +77,6 @@ const App = () => {
       {userToken && !isAdminPath && <Navbar />}
       
       <Routes>
-        {/* Existing Routes */}
         <Route path="/login" element={!userToken ? <Login /> : <Navigate to={"/"} />} />
         <Route path="/" element={userToken ? <Home /> : <Navigate to={"/login"} />} />
         <Route path="/about" element={userToken ? <About /> : <Navigate to={"/login"} />} />
@@ -84,12 +85,10 @@ const App = () => {
         <Route path="/my-bookings" element={userToken ? <MyBookings /> : <Navigate to={"/login"} />} />
         <Route path="/booking/:id" element={userToken ? <BookingPage /> : <Navigate to="/login" />} />
 
-        {/* 🆕 Self Booking Routes */}
         <Route path="/self-booking/seats/:tempBusId" element={userToken ? <SelfBookingSeatSelection /> : <Navigate to="/login" />} />
         <Route path="/self-booking/payment/:tempBusId" element={userToken ? <SelfBookingPayment /> : <Navigate to="/login" />} />
         <Route path="/booking-success" element={userToken ? <BookingSuccess /> : <Navigate to="/login" />} />
 
-        {/* Admin Routes */}
         <Route path="/owner/login" element={!adminToken ? <OwnerLogin /> : <Navigate to={"/owner"} />} />
         <Route path="/owner" element={adminToken ? <Layout /> : <Navigate to={"/owner/login"} />}>
           <Route index element={<Navigate to="dashboard" />} />
@@ -99,17 +98,19 @@ const App = () => {
           <Route path="manage-bookings" element={<ManageBookings />} />
           <Route path="/owner/manage-users" element={<ManageUsers />} />
           <Route path="/owner/manage-messages" element={<ManageMessages />} />
+          <Route path="/owner/set-rates" element={<RouteRatesManager />} />
+          <Route path="/owner/newsletter" element={<NewsletterAdmin />} />
         </Route>
       </Routes>
       
       {userToken && !isAdminPath && <Footer />}
       
-      {/* 🆕 Floating Button - Bottom Right Fixed */}
+    
       {showFloatingButton && (
         <FloatingCreateTripButton onClick={() => setShowSelfBooking(true)} />
       )}
       
-      {/* 🆕 Self Booking Modal */}
+
       {showSelfBooking && (
         <SelfBookingForm onClose={() => setShowSelfBooking(false)} />
       )}

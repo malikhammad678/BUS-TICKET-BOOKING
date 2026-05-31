@@ -366,7 +366,6 @@ const Confirmation = ({ bus, passenger, selectedSeats, paymentId }) => {
         </div>
       </div>
 
-      {/* ❌ Download disabled — pending میں نہیں */}
       <button
         disabled
         title="Ticket download available after admin confirmation"

@@ -104,7 +104,7 @@ const BookingSuccess = () => {
 
         <div className="bg-white rounded-3xl shadow-lg p-8 text-center">
 
-          {/* Icon — pending yellow, confirmed green */}
+        
           {isPending ? (
             <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Clock size={44} className="text-yellow-500" />
@@ -115,7 +115,7 @@ const BookingSuccess = () => {
             </div>
           )}
 
-          {/* Heading */}
+        
           {isPending ? (
             <>
               <h2 className="text-2xl font-bold text-gray-800 mb-2">Booking Submitted! ⏳</h2>
@@ -132,7 +132,7 @@ const BookingSuccess = () => {
             </>
           )}
 
-          {/* Booking Info Card */}
+       
           <div className={`rounded-xl p-4 mb-6 text-left border-2 border-dashed ${isPending ? "bg-yellow-50 border-yellow-200" : "bg-gray-50 border-transparent"}`}>
             <div className="flex justify-between mb-2">
               <span className="text-gray-500">Booking ID</span>
@@ -166,7 +166,8 @@ const BookingSuccess = () => {
             </div>
           </div>
 
-          {/* Download Button */}
+       
+       
           <div className="flex gap-3">
             {isPending ? (
               <button

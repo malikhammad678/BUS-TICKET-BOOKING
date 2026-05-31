@@ -25,7 +25,6 @@ const BusList = () => {
   return (
     <div className="space-y-4 sm:space-y-5">
 
-      {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-gray-800 tracking-tight">Bus List</h1>
@@ -42,7 +41,6 @@ const BusList = () => {
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
-        {/* Search */}
         <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-100">
           <div className="relative w-full sm:max-w-sm">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -56,7 +54,6 @@ const BusList = () => {
           </div>
         </div>
 
-        {/* Desktop Table */}
         <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -131,7 +128,6 @@ const BusList = () => {
           </table>
         </div>
 
-        {/* Mobile Card View */}
         <div className="sm:hidden divide-y divide-gray-50">
           {filtered.length > 0 ? filtered.map((b) => (
             <div key={b._id} className="p-4 flex items-start gap-3">
@@ -174,7 +170,6 @@ const BusList = () => {
           )}
         </div>
 
-        {/* Footer */}
         <div className="px-4 sm:px-5 py-3 border-t border-gray-100 bg-gray-50/50">
           <p className="text-xs text-gray-400">
             Showing <span className="font-semibold text-gray-600">{filtered.length}</span> of <span className="font-semibold text-gray-600">{buses.length}</span> buses

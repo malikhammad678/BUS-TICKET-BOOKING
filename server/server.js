@@ -9,6 +9,7 @@ import paymentRouter from './routes/payment.routes.js'
 import cors from 'cors'
 import contactRouter from './routes/contact.route.js'
 import selfBookingRouter from "./routes/selfBooking.routes.js";
+import newsletterRouter from './routes/newsletter.route.js'
 
 const app = express()
 app.use(express.json())
@@ -25,6 +26,7 @@ app.use("/api/booking", bookingRouter);
 app.use("/api/payment", paymentRouter);
 app.use("/api/contact", contactRouter)
 app.use("/api/self-booking", selfBookingRouter);
+app.use("/api/newsletter", newsletterRouter);
 
 app.get("/", (req,res) => {
     res.json({ message:`Server is running on ${PORT}` })
